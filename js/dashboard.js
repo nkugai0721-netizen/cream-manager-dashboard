@@ -100,12 +100,15 @@ function renderTable(data) {
       title: 'コスト', rows: [
         { label: '変動費合計', field: 'varTotal', fmt: 'yen', highlight: true },
         { label: '食材費', field: 'foodCost', fmt: 'yen' },
+        { label: '  食材費率', field: 'foodCostPct', fmt: 'pct', computed: true },
         { label: 'ドリンク費', field: 'drinkCost', fmt: 'yen', snackNA: true },
+        { label: '  ドリンク費率', field: 'drinkCostPct', fmt: 'pct', snackNA: true, computed: true },
         { label: '消耗品', field: 'supplyCost', fmt: 'yen', snackNA: true },
+        { label: '  消耗品率', field: 'supplyCostPct', fmt: 'pct', snackNA: true, computed: true },
+        { label: '変動費率', field: 'varRatio', fmt: 'pct', highlight: true },
         { label: '人件費合計', field: 'labTotal', fmt: 'yen', highlight: true },
+        { label: '人件費率', field: 'labRatio', fmt: 'pct', highlight: true },
         { label: 'Uber手数料(30%)', field: 'uberComm', fmt: 'yen', garageOnly: true },
-        { label: '変動費率', field: 'varRatio', fmt: 'pct' },
-        { label: '人件費率', field: 'labRatio', fmt: 'pct' },
         { label: 'FL比率', field: 'flRatio', fmt: 'pct', highlight: true }
       ]
     }
@@ -142,11 +145,14 @@ function renderTable(data) {
           td.textContent = '-';
         } else {
           let val = store[rowDef.field];
-          // 売上構成比は動的に計算
+          // 構成比は動的に計算
           if (rowDef.computed && store.sales > 0) {
             if (rowDef.field === 'foodPct') val = store.food / store.sales;
             else if (rowDef.field === 'drinkPct') val = store.drink / store.sales;
             else if (rowDef.field === 'otherPct') val = store.other / store.sales;
+            else if (rowDef.field === 'foodCostPct') val = (store.foodCost || 0) / store.sales;
+            else if (rowDef.field === 'drinkCostPct') val = (store.drinkCost || 0) / store.sales;
+            else if (rowDef.field === 'supplyCostPct') val = (store.supplyCost || 0) / store.sales;
           }
           if (rowDef.fmt === 'yen') td.textContent = fmtYen(val);
           else if (rowDef.fmt === 'pct') {
@@ -164,11 +170,15 @@ function renderTable(data) {
       const totalTd = document.createElement('td');
       totalTd.className = 'store-table__cell store-table__cell--total';
       let totalVal = data.total[rowDef.field];
-      // 売上構成比は動的に計算
+      // 構成比は動的に計算
       if (rowDef.computed && data.total.sales > 0) {
-        if (rowDef.field === 'foodPct') totalVal = data.total.food / data.total.sales;
-        else if (rowDef.field === 'drinkPct') totalVal = data.total.drink / data.total.sales;
-        else if (rowDef.field === 'otherPct') totalVal = data.total.other / data.total.sales;
+        const s = data.total.sales;
+        if (rowDef.field === 'foodPct') totalVal = data.total.food / s;
+        else if (rowDef.field === 'drinkPct') totalVal = data.total.drink / s;
+        else if (rowDef.field === 'otherPct') totalVal = data.total.other / s;
+        else if (rowDef.field === 'foodCostPct') totalVal = (data.total.foodCost || 0) / s;
+        else if (rowDef.field === 'drinkCostPct') totalVal = (data.total.drinkCost || 0) / s;
+        else if (rowDef.field === 'supplyCostPct') totalVal = (data.total.supplyCost || 0) / s;
       }
       if (rowDef.garageOnly) {
         totalTd.textContent = fmtYen(data.total.uber || 0);

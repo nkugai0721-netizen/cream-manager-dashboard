@@ -1,4 +1,10 @@
 // Chart.js グラフ描画
+// datalabelsプラグインをグローバル登録
+Chart.register(ChartDataLabels);
+
+// 共通: datalabelsをデフォルト非表示（チャートごとに有効化）
+Chart.defaults.set('plugins.datalabels', { display: false });
+
 let storeChart = null;
 
 function renderStoreChart(data) {
@@ -6,7 +12,6 @@ function renderStoreChart(data) {
   const stores = ['せんべろ', 'GARAGE', 'Leje', 'ちゃっきー'];
   const storeKeys = ['せんべろ本店', 'SAN DRIP GARAGE', 'Leje', 'ちゃっきー'];
 
-  // 既存チャートがあれば破棄
   if (storeChart) storeChart.destroy();
 
   storeChart = new Chart(ctx, {
@@ -51,6 +56,14 @@ function renderStoreChart(data) {
           callbacks: {
             label: (ctx) => `${ctx.dataset.label}: ¥${ctx.raw.toLocaleString()}`
           }
+        },
+        datalabels: {
+          display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0,
+          anchor: 'end',
+          align: 'top',
+          font: { size: 10, weight: '600', family: "'Montserrat', sans-serif" },
+          color: '#555',
+          formatter: (v) => `¥${(v / 10000).toFixed(0)}万`
         }
       },
       scales: {
@@ -81,10 +94,10 @@ function renderFLChart(data) {
 
   if (flChart) flChart.destroy();
 
-  const varRatios = storeKeys.map(k => ((data.stores[k]?.varRatio || 0) * 100).toFixed(1));
-  const labRatios = storeKeys.map(k => ((data.stores[k]?.labRatio || 0) * 100).toFixed(1));
-  varRatios.push(((data.total.varRatio || 0) * 100).toFixed(1));
-  labRatios.push(((data.total.labRatio || 0) * 100).toFixed(1));
+  const varRatios = storeKeys.map(k => parseFloat(((data.stores[k]?.varRatio || 0) * 100).toFixed(1)));
+  const labRatios = storeKeys.map(k => parseFloat(((data.stores[k]?.labRatio || 0) * 100).toFixed(1)));
+  varRatios.push(parseFloat(((data.total.varRatio || 0) * 100).toFixed(1)));
+  labRatios.push(parseFloat(((data.total.labRatio || 0) * 100).toFixed(1)));
 
   flChart = new Chart(ctx, {
     type: 'bar',
@@ -121,6 +134,14 @@ function renderFLChart(data) {
         },
         tooltip: {
           callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw}%` }
+        },
+        datalabels: {
+          display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0,
+          anchor: 'center',
+          align: 'center',
+          font: { size: 11, weight: '700', family: "'Montserrat', sans-serif" },
+          color: '#fff',
+          formatter: (v) => `${v}%`
         }
       },
       scales: {
@@ -185,6 +206,15 @@ function renderSalesCompChart(data) {
               return `${ctx.label}: ¥${ctx.raw.toLocaleString()} (${pct}%)`;
             }
           }
+        },
+        datalabels: {
+          display: (ctx) => {
+            const v = ctx.dataset.data[ctx.dataIndex];
+            return total > 0 && (v / total) > 0.05;
+          },
+          font: { size: 13, weight: '700', family: "'Montserrat', sans-serif" },
+          color: '#fff',
+          formatter: (v) => total > 0 ? `${((v / total) * 100).toFixed(1)}%` : ''
         }
       }
     }
@@ -203,6 +233,7 @@ function renderCostCompChart(data) {
   const labTotal = t.labTotal || 0;
   const uberComm = t.uberComm || 0;
   const remaining = Math.max(0, (t.sales || 0) - varTotal - labTotal - uberComm);
+  const salesTotal = t.sales || 1;
 
   costCompChart = new Chart(ctx, {
     type: 'doughnut',
@@ -232,11 +263,19 @@ function renderCostCompChart(data) {
         tooltip: {
           callbacks: {
             label: (ctx) => {
-              const sales = data.total.sales || 1;
-              const pct = ((ctx.raw / sales) * 100).toFixed(1);
+              const pct = ((ctx.raw / salesTotal) * 100).toFixed(1);
               return `${ctx.label}: ¥${ctx.raw.toLocaleString()} (${pct}%)`;
             }
           }
+        },
+        datalabels: {
+          display: (ctx) => {
+            const v = ctx.dataset.data[ctx.dataIndex];
+            return (v / salesTotal) > 0.05;
+          },
+          font: { size: 13, weight: '700', family: "'Montserrat', sans-serif" },
+          color: '#fff',
+          formatter: (v) => `${((v / salesTotal) * 100).toFixed(1)}%`
         }
       }
     }
