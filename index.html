@@ -135,6 +135,73 @@
           </div>
         </div>
 
+        <!-- ========== SNS Section ========== -->
+        <div class="section-divider">
+          <div class="section-divider__label">SNS・集客チャネル</div>
+        </div>
+
+        <!-- SNS KPI Cards -->
+        <div class="kpi-grid" id="snsKpiGrid">
+          <div class="kpi-card">
+            <div class="kpi-card__icon">📱</div>
+            <div class="kpi-card__value" id="kpi-followers">--</div>
+            <div class="kpi-card__label">IG全店フォロワー</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__icon">👁️</div>
+            <div class="kpi-card__value" id="kpi-reach">--</div>
+            <div class="kpi-card__label">IG全店リーチ(28日)</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__icon">❤️</div>
+            <div class="kpi-card__value" id="kpi-eng-rate">--</div>
+            <div class="kpi-card__label">IG平均Eng率</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__icon">🔗</div>
+            <div class="kpi-card__value" id="kpi-web-clicks">--</div>
+            <div class="kpi-card__label">IG Webクリック(28日)</div>
+          </div>
+        </div>
+
+        <!-- SNS Chart -->
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-card__title">店舗別 IGリーチ・フォロワー</div>
+            <div class="chart-card__canvas chart-card__canvas--short">
+              <canvas id="snsReachChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card__title">店舗別 IGエンゲージメント率</div>
+            <div class="chart-card__canvas chart-card__canvas--short">
+              <canvas id="snsEngChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- SNS Table -->
+        <div class="table-card">
+          <div class="table-card__title">SNS詳細データ</div>
+          <div class="table-card__wrapper">
+            <table class="store-table" id="snsTable">
+              <thead id="snsTableHead"></thead>
+              <tbody id="snsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Ad Media Table -->
+        <div class="table-card" id="adTableCard">
+          <div class="table-card__title">広告媒体・予約</div>
+          <div class="table-card__wrapper">
+            <table class="store-table" id="adTable">
+              <thead id="adTableHead"></thead>
+              <tbody id="adTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </main>
 

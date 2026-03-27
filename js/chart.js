@@ -281,3 +281,126 @@ function renderCostCompChart(data) {
     }
   });
 }
+
+// ===== SNSチャート =====
+
+// IGリーチ・フォロワー棒グラフ
+let snsReachChart = null;
+
+function renderSNSReachChart(sns) {
+  const ctx = document.getElementById('snsReachChart').getContext('2d');
+  if (snsReachChart) snsReachChart.destroy();
+
+  if (!sns || !sns.ig || sns.ig.length === 0) return;
+
+  const labels = sns.ig.map(i => i.store.replace('_ishigaki', '').replace('San drip garage', 'GARAGE').replace('せんべろ風土', 'せんべろ').replace('Leje石垣島', 'Leje'));
+
+  snsReachChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'リーチ(28日)',
+          data: sns.ig.map(i => i.reach),
+          backgroundColor: '#7B1FA2',
+          borderRadius: 4
+        },
+        {
+          label: 'フォロワー',
+          data: sns.ig.map(i => i.followers),
+          backgroundColor: '#E1BEE7',
+          borderRadius: 4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            font: { family: "'Noto Sans JP', sans-serif", size: 12 },
+            padding: 16, usePointStyle: true, pointStyle: 'rectRounded'
+          }
+        },
+        tooltip: {
+          callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString()}` }
+        },
+        datalabels: {
+          display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0,
+          anchor: 'end', align: 'top',
+          font: { size: 10, weight: '600', family: "'Montserrat', sans-serif" },
+          color: '#555',
+          formatter: (v) => v >= 10000 ? `${(v / 10000).toFixed(1)}万` : v.toLocaleString()
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { callback: (v) => v >= 10000 ? `${(v / 10000).toFixed(0)}万` : v, font: { size: 11 } },
+          grid: { color: 'rgba(0,0,0,0.06)' }
+        },
+        x: { ticks: { font: { size: 12 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+// IGエンゲージメント率 横棒グラフ
+let snsEngChart = null;
+
+function renderSNSEngChart(sns) {
+  const ctx = document.getElementById('snsEngChart').getContext('2d');
+  if (snsEngChart) snsEngChart.destroy();
+
+  if (!sns || !sns.ig || sns.ig.length === 0) return;
+
+  const labels = sns.ig.map(i => i.store.replace('_ishigaki', '').replace('San drip garage', 'GARAGE').replace('せんべろ風土', 'せんべろ').replace('Leje石垣島', 'Leje'));
+
+  // Threads/Xも追加
+  const engData = sns.ig.map(i => i.engRate);
+  if (sns.threads) { labels.push('Threads'); engData.push(0); }
+  if (sns.x) { labels.push('X'); engData.push(sns.x.engRate); }
+
+  snsEngChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Eng率(%)',
+        data: engData,
+        backgroundColor: engData.map(v => v >= 1.5 ? '#4CAF50' : v >= 1.0 ? '#FBBC04' : '#EA4335'),
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: (ctx) => `Eng率: ${ctx.raw}%` }
+        },
+        datalabels: {
+          display: true,
+          anchor: 'end', align: 'end',
+          font: { size: 12, weight: '700', family: "'Montserrat', sans-serif" },
+          color: '#333',
+          formatter: (v) => `${v}%`
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          max: Math.max(...engData) * 1.3 || 5,
+          ticks: { callback: (v) => `${v}%`, font: { size: 11 } },
+          grid: { color: 'rgba(0,0,0,0.06)' }
+        },
+        y: { ticks: { font: { size: 12 } }, grid: { display: false } }
+      }
+    }
+  });
+}

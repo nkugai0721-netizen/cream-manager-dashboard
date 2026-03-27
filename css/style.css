@@ -398,6 +398,25 @@ body {
 .cell--warning { color: var(--color-warning); font-weight: 700; }
 .cell--danger { color: var(--color-danger); font-weight: 700; }
 
+/* --- Section Divider --- */
+.section-divider {
+  margin: 32px 0 24px;
+  border-top: 2px solid var(--color-primary);
+  position: relative;
+}
+
+.section-divider__label {
+  position: absolute;
+  top: -12px;
+  left: 24px;
+  background: var(--color-bg);
+  padding: 0 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.5px;
+}
+
 /* --- Footer --- */
 .dash-footer {
   text-align: center;

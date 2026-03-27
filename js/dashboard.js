@@ -197,6 +197,159 @@ function renderTable(data) {
   });
 }
 
+// ===== SNS描画 =====
+
+// SNS KPIカード
+function renderSNSKpi(sns) {
+  if (!sns || !sns.ig || sns.ig.length === 0) {
+    document.getElementById('snsKpiGrid').style.display = 'none';
+    return;
+  }
+  document.getElementById('snsKpiGrid').style.display = '';
+  const totalFollowers = sns.ig.reduce((s, i) => s + i.followers, 0);
+  const totalReach = sns.ig.reduce((s, i) => s + i.reach, 0);
+  const totalClicks = sns.ig.reduce((s, i) => s + i.webClicks, 0);
+  const avgEng = sns.ig.reduce((s, i) => s + i.engRate, 0) / sns.ig.length;
+
+  document.getElementById('kpi-followers').textContent = totalFollowers.toLocaleString();
+  document.getElementById('kpi-reach').textContent = totalReach.toLocaleString();
+  document.getElementById('kpi-eng-rate').textContent = avgEng.toFixed(2) + '%';
+  document.getElementById('kpi-web-clicks').textContent = totalClicks.toLocaleString();
+}
+
+// SNSテーブル
+function renderSNSTable(sns) {
+  const thead = document.getElementById('snsTableHead');
+  const tbody = document.getElementById('snsTableBody');
+  thead.innerHTML = '';
+  tbody.innerHTML = '';
+
+  if (!sns || !sns.ig || sns.ig.length === 0) return;
+
+  // ヘッダー
+  thead.innerHTML = `<tr>
+    <th>プラットフォーム</th><th>アカウント</th><th>フォロワー</th>
+    <th>リーチ/ビュー</th><th>PV</th><th>Eng率</th><th>投稿数</th>
+  </tr>`;
+
+  // IG行
+  sns.ig.forEach(ig => {
+    const shortName = ig.store.replace('_ishigaki', '').replace('San drip garage', 'GARAGE');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="store-table__label">Instagram</td>
+      <td class="store-table__cell">${shortName}</td>
+      <td class="store-table__cell">${ig.followers.toLocaleString()}</td>
+      <td class="store-table__cell">${ig.reach.toLocaleString()}</td>
+      <td class="store-table__cell">${ig.pv.toLocaleString()}</td>
+      <td class="store-table__cell">${ig.engRate}%</td>
+      <td class="store-table__cell">${ig.posts}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Threads行
+  if (sns.threads) {
+    const t = sns.threads;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="store-table__label">Threads</td>
+      <td class="store-table__cell">Leje</td>
+      <td class="store-table__cell">${t.followers.toLocaleString()}</td>
+      <td class="store-table__cell">${t.views.toLocaleString()}</td>
+      <td class="store-table__cell">-</td>
+      <td class="store-table__cell">-</td>
+      <td class="store-table__cell">-</td>`;
+    tbody.appendChild(tr);
+  }
+
+  // X行
+  if (sns.x) {
+    const x = sns.x;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="store-table__label">X</td>
+      <td class="store-table__cell">Leje</td>
+      <td class="store-table__cell">${x.followers.toLocaleString()}</td>
+      <td class="store-table__cell">${x.impressions.toLocaleString()}</td>
+      <td class="store-table__cell">-</td>
+      <td class="store-table__cell">${x.engRate}%</td>
+      <td class="store-table__cell">${x.posts}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  // TikTok行
+  if (sns.tiktok) {
+    const tt = sns.tiktok;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="store-table__label">TikTok</td>
+      <td class="store-table__cell">ちゃっきー</td>
+      <td class="store-table__cell">${tt.followers.toLocaleString()}</td>
+      <td class="store-table__cell">${tt.views.toLocaleString()}</td>
+      <td class="store-table__cell">-</td>
+      <td class="store-table__cell">${tt.engRate}%</td>
+      <td class="store-table__cell">${tt.videos}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+// 広告媒体・予約テーブル
+function renderAdTable(sns) {
+  const thead = document.getElementById('adTableHead');
+  const tbody = document.getElementById('adTableBody');
+  thead.innerHTML = '';
+  tbody.innerHTML = '';
+
+  const hasAds = sns && sns.ads && sns.ads.length > 0;
+  const hasRes = sns && sns.reservations && sns.reservations.length > 0;
+  if (!hasAds && !hasRes) {
+    document.getElementById('adTableCard').style.display = 'none';
+    return;
+  }
+  document.getElementById('adTableCard').style.display = '';
+
+  thead.innerHTML = `<tr>
+    <th>店舗</th><th>チャネル</th><th>月額コスト</th>
+    <th>予約/来店数</th><th>CPA</th>
+  </tr>`;
+
+  // 広告行
+  if (hasAds) {
+    sns.ads.forEach(ad => {
+      const tr = document.createElement('tr');
+      const costStr = ad.monthlyCost > 0 ? fmtYen(ad.monthlyCost) : '無料';
+      const visitStr = ad.estimatedVisits > 0 ? ad.estimatedVisits + '件' : '-';
+      const cpaStr = ad.cpa > 0 ? fmtYen(ad.cpa) : '-';
+      tr.innerHTML = `
+        <td class="store-table__label">${ad.store}</td>
+        <td class="store-table__cell">${ad.channel}</td>
+        <td class="store-table__cell">${costStr}</td>
+        <td class="store-table__cell">${visitStr}</td>
+        <td class="store-table__cell">${cpaStr}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // 予約データ行
+  if (hasRes) {
+    const secRow = document.createElement('tr');
+    secRow.className = 'store-table__section-header';
+    secRow.innerHTML = '<td colspan="5">予約データ（最新月）</td>';
+    tbody.appendChild(secRow);
+
+    sns.reservations.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="store-table__label">${r.store}</td>
+        <td class="store-table__cell">${r.platform}</td>
+        <td class="store-table__cell">-</td>
+        <td class="store-table__cell">${r.total}件</td>
+        <td class="store-table__cell">PV: ${r.pv.toLocaleString()}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+}
+
 // データ読み込み・描画
 async function loadDashboard() {
   showLoading(true);
@@ -209,6 +362,14 @@ async function loadDashboard() {
     renderSalesCompChart(data);
     renderCostCompChart(data);
     renderTable(data);
+    // SNSセクション
+    if (data.sns) {
+      renderSNSKpi(data.sns);
+      renderSNSReachChart(data.sns);
+      renderSNSEngChart(data.sns);
+      renderSNSTable(data.sns);
+      renderAdTable(data.sns);
+    }
     showLoading(false);
   } catch (e) {
     showLoading(false);
