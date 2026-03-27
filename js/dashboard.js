@@ -110,7 +110,8 @@ function renderTable(data) {
         { label: '人件費率', field: 'labRatio', fmt: 'pct', highlight: true },
         { label: 'Uber手数料(30%)', field: 'uberComm', fmt: 'yen', garageOnly: true },
         { label: 'FL比率', field: 'flRatio', fmt: 'pct', highlight: true },
-        { label: '固定費合計', field: 'fixedTotal', fmt: 'yen', highlight: true }
+        { label: '固定費合計', field: 'fixedTotal', fmt: 'yen', highlight: true },
+        { label: '営業利益', field: 'opProfit', fmt: 'yen', highlight: true, profitColor: true }
       ]
     }
   ];
@@ -163,6 +164,8 @@ function renderTable(data) {
             else if (rowDef.field === 'flRatio' && val > 0.60) td.classList.add('cell--warning');
           }
           else td.textContent = fmtNum(val);
+          // 営業利益マイナスで赤字
+          if (rowDef.profitColor && val < 0) td.classList.add('cell--danger');
         }
         tr.appendChild(td);
       });
@@ -191,6 +194,7 @@ function renderTable(data) {
         else if (rowDef.field === 'flRatio' && totalVal > 0.60) totalTd.classList.add('cell--warning');
       }
       else totalTd.textContent = fmtNum(totalVal);
+      if (rowDef.profitColor && totalVal < 0) totalTd.classList.add('cell--danger');
       tr.appendChild(totalTd);
 
       tbody.appendChild(tr);
