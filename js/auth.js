@@ -2,8 +2,8 @@
 // パスワードのSHA-256ハッシュとAES暗号化されたAPIトークンを埋め込む
 // 初期セットアップ時に setup.html で生成する
 const AUTH_CONFIG = {
-  passwordHash: '', // SHA-256(パスワード) — セットアップ時に設定
-  encryptedToken: '' // AES暗号化(APIトークン, パスワード) — セットアップ時に設定
+  passwordHash: '8246b86a6902e4dcfcadc03dd5c61ef53fc618bb0b2ffc194959dd37e735395e',
+  encryptedToken: 'a8cbe7fdee906635640cf34935a3cc42b4b033803aa60276ed5f43d0778d8c9e3677f8988dbd52fb889af9b67bdda4bd916163d1ac8e327268eb6fe50afcc8113446a4a522cffc8889fee0de7f38d2443cd12b314e7f429b84aecbb8'
 };
 
 // SHA-256ハッシュ
