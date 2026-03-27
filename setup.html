@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Dashboard Setup</title>
+  <style>
+    body { font-family: system-ui; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+    h1 { font-size: 1.3rem; margin-bottom: 24px; }
+    label { display: block; font-weight: 600; margin-top: 16px; font-size: 0.9rem; }
+    input { width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; }
+    button { margin-top: 20px; padding: 12px 24px; background: #1A237E; color: #fff; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+    button:hover { background: #3F51B5; }
+    .result { margin-top: 24px; padding: 16px; background: #f5f5f5; border-radius: 8px; word-break: break-all; font-family: monospace; font-size: 0.85rem; }
+    .result h3 { font-size: 0.9rem; margin-bottom: 8px; }
+    .result code { display: block; margin-top: 4px; background: #fff; padding: 8px; border-radius: 4px; }
+    .note { color: #666; font-size: 0.8rem; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>CREAM Dashboard — 初期セットアップ</h1>
+  <p style="font-size:0.9rem;color:#666;">パスワードとAPIトークンを入力して、auth.jsに埋め込む値を生成します。</p>
+
+  <label>パスワード（責任者用）</label>
+  <input type="text" id="password" placeholder="責任者が使うパスワード">
+
+  <label>APIトークン（GAS ScriptPropertiesに設定した値）</label>
+  <input type="text" id="apiToken" placeholder="DASHBOARD_API_TOKENの値">
+
+  <button onclick="generate()">生成</button>
+
+  <div id="output" style="display:none;">
+    <div class="result">
+      <h3>auth.js に設定する値:</h3>
+      <label>passwordHash:</label>
+      <code id="outHash"></code>
+      <label>encryptedToken:</label>
+      <code id="outEncrypted"></code>
+    </div>
+    <p class="note">上記の値を js/auth.js の AUTH_CONFIG にコピペしてください。</p>
+  </div>
+
+  <script>
+    async function sha256(message) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function deriveKey(password) {
+      const enc = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+      return crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: enc.encode('cream-dashboard'), iterations: 100000, hash: 'SHA-256' },
+        keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+      );
+    }
+
+    async function encryptToken(token, password) {
+      const key = await deriveKey(password);
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(token));
+      const combined = new Uint8Array(iv.length + new Uint8Array(encrypted).length);
+      combined.set(iv);
+      combined.set(new Uint8Array(encrypted), iv.length);
+      return Array.from(combined).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function generate() {
+      const password = document.getElementById('password').value;
+      const apiToken = document.getElementById('apiToken').value;
+      if (!password || !apiToken) { alert('両方入力してください'); return; }
+
+      const hash = await sha256(password);
+      const encrypted = await encryptToken(apiToken, password);
+
+      document.getElementById('outHash').textContent = hash;
+      document.getElementById('outEncrypted').textContent = encrypted;
+      document.getElementById('output').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

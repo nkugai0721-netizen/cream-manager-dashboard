@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>CREAM Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ========== Login Screen ========== -->
+  <div id="loginScreen" class="login">
+    <div class="login__card">
+      <div class="login__logo">CREAM Dashboard</div>
+      <div class="login__subtitle">責任者ダッシュボード</div>
+      <form id="loginForm">
+        <input type="password" id="passwordInput" class="login__input" placeholder="パスワードを入力" autocomplete="current-password" required>
+        <button type="submit" class="login__btn">ログイン</button>
+      </form>
+      <div id="loginError" class="login__error"></div>
+    </div>
+  </div>
+
+  <!-- ========== Dashboard Screen ========== -->
+  <div id="dashboardScreen" style="display:none;">
+
+    <!-- Header -->
+    <header class="dash-header">
+      <div class="dash-header__inner">
+        <div class="dash-header__left">
+          <div class="dash-header__title">CREAM Dashboard</div>
+          <div class="dash-header__month" id="targetMonth"></div>
+        </div>
+        <div class="dash-header__right">
+          <span class="dash-header__updated" id="updatedAt"></span>
+          <button class="dash-header__btn" id="refreshBtn">更新</button>
+          <button class="dash-header__btn dash-header__btn--logout" id="logoutBtn">ログアウト</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="container">
+
+      <!-- Loading -->
+      <div id="loading" class="loading">
+        <div class="loading__spinner"></div>
+        <div class="loading__text">データを取得中...</div>
+      </div>
+
+      <!-- Error -->
+      <div id="errorMsg" class="error-msg"></div>
+
+      <!-- Dashboard Content -->
+      <div id="dashContent" style="display:none;">
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-card__icon">📊</div>
+            <div class="kpi-card__value" id="kpi-sales">--</div>
+            <div class="kpi-card__label">全店総売上</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__icon">👥</div>
+            <div class="kpi-card__value" id="kpi-guests">--</div>
+            <div class="kpi-card__label">全店客数</div>
+          </div>
+          <div class="kpi-card" id="kpi-fl-wrapper">
+            <div class="kpi-card__icon">⚖️</div>
+            <div class="kpi-card__value" id="kpi-fl">--</div>
+            <div class="kpi-card__label">FL比率</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__icon">💰</div>
+            <div class="kpi-card__value" id="kpi-avg-price">--</div>
+            <div class="kpi-card__label">平均客単価</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-card__title">店舗別 売上・変動費・人件費</div>
+            <div class="chart-card__canvas">
+              <canvas id="storeChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card__title">FL比率（変動費率 + 人件費率）</div>
+            <div class="chart-card__canvas">
+              <canvas id="flChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Store Table -->
+        <div class="table-card">
+          <div class="table-card__title">店舗別詳細</div>
+          <div class="table-card__wrapper">
+            <table class="store-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>せんべろ</th>
+                  <th>GARAGE</th>
+                  <th>Leje</th>
+                  <th>ちゃっきー</th>
+                  <th>全店合計</th>
+                </tr>
+              </thead>
+              <tbody id="storeTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="dash-footer">
+      &copy; CREAM OF THE CROP
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/dashboard.js"></script>
+
+</body>
+</html>
