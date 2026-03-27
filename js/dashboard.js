@@ -109,7 +109,8 @@ function renderTable(data) {
         { label: '人件費合計', field: 'labTotal', fmt: 'yen', highlight: true },
         { label: '人件費率', field: 'labRatio', fmt: 'pct', highlight: true },
         { label: 'Uber手数料(30%)', field: 'uberComm', fmt: 'yen', garageOnly: true },
-        { label: 'FL比率', field: 'flRatio', fmt: 'pct', highlight: true }
+        { label: 'FL比率', field: 'flRatio', fmt: 'pct', highlight: true },
+        { label: '固定費合計', field: 'fixedTotal', fmt: 'yen', highlight: true }
       ]
     }
   ];
