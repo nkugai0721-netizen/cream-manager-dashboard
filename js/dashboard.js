@@ -90,6 +90,13 @@ function renderTable(data) {
       ]
     },
     {
+      title: '売上構成比', rows: [
+        { label: 'フード比率', field: 'foodPct', fmt: 'pct', snackNA: true, computed: true },
+        { label: 'ドリンク比率', field: 'drinkPct', fmt: 'pct', snackNA: true, computed: true },
+        { label: 'その他比率', field: 'otherPct', fmt: 'pct', snackNA: true, computed: true }
+      ]
+    },
+    {
       title: 'コスト', rows: [
         { label: '変動費合計', field: 'varTotal', fmt: 'yen', highlight: true },
         { label: '食材費', field: 'foodCost', fmt: 'yen' },
@@ -97,6 +104,8 @@ function renderTable(data) {
         { label: '消耗品', field: 'supplyCost', fmt: 'yen', snackNA: true },
         { label: '人件費合計', field: 'labTotal', fmt: 'yen', highlight: true },
         { label: 'Uber手数料(30%)', field: 'uberComm', fmt: 'yen', garageOnly: true },
+        { label: '変動費率', field: 'varRatio', fmt: 'pct' },
+        { label: '人件費率', field: 'labRatio', fmt: 'pct' },
         { label: 'FL比率', field: 'flRatio', fmt: 'pct', highlight: true }
       ]
     }
@@ -132,7 +141,13 @@ function renderTable(data) {
         } else if (rowDef.snackNA && store.isSnack) {
           td.textContent = '-';
         } else {
-          const val = store[rowDef.field];
+          let val = store[rowDef.field];
+          // 売上構成比は動的に計算
+          if (rowDef.computed && store.sales > 0) {
+            if (rowDef.field === 'foodPct') val = store.food / store.sales;
+            else if (rowDef.field === 'drinkPct') val = store.drink / store.sales;
+            else if (rowDef.field === 'otherPct') val = store.other / store.sales;
+          }
           if (rowDef.fmt === 'yen') td.textContent = fmtYen(val);
           else if (rowDef.fmt === 'pct') {
             td.textContent = fmtPct(val);
@@ -148,7 +163,13 @@ function renderTable(data) {
       // 全店合計列
       const totalTd = document.createElement('td');
       totalTd.className = 'store-table__cell store-table__cell--total';
-      const totalVal = data.total[rowDef.field];
+      let totalVal = data.total[rowDef.field];
+      // 売上構成比は動的に計算
+      if (rowDef.computed && data.total.sales > 0) {
+        if (rowDef.field === 'foodPct') totalVal = data.total.food / data.total.sales;
+        else if (rowDef.field === 'drinkPct') totalVal = data.total.drink / data.total.sales;
+        else if (rowDef.field === 'otherPct') totalVal = data.total.other / data.total.sales;
+      }
       if (rowDef.garageOnly) {
         totalTd.textContent = fmtYen(data.total.uber || 0);
         if (rowDef.field === 'uberComm') totalTd.textContent = fmtYen(data.total.uberComm || 0);
@@ -175,6 +196,8 @@ async function loadDashboard() {
     renderKPI(data);
     renderStoreChart(data);
     renderFLChart(data);
+    renderSalesCompChart(data);
+    renderCostCompChart(data);
     renderTable(data);
     showLoading(false);
   } catch (e) {

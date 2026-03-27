@@ -139,3 +139,106 @@ function renderFLChart(data) {
     }
   });
 }
+
+// 売上構成比ドーナツチャート
+let salesCompChart = null;
+
+function renderSalesCompChart(data) {
+  const ctx = document.getElementById('salesCompChart').getContext('2d');
+  if (salesCompChart) salesCompChart.destroy();
+
+  const t = data.total;
+  const food = t.food || 0;
+  const drink = t.drink || 0;
+  const other = t.other || 0;
+  const total = food + drink + other;
+
+  salesCompChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['フード', 'ドリンク', 'その他'],
+      datasets: [{
+        data: [food, drink, other],
+        backgroundColor: ['#4285F4', '#FBBC04', '#34A853'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '55%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            font: { family: "'Noto Sans JP', sans-serif", size: 12 },
+            padding: 16,
+            usePointStyle: true,
+            pointStyle: 'circle'
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const pct = total > 0 ? ((ctx.raw / total) * 100).toFixed(1) : 0;
+              return `${ctx.label}: ¥${ctx.raw.toLocaleString()} (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// コスト構成比ドーナツチャート
+let costCompChart = null;
+
+function renderCostCompChart(data) {
+  const ctx = document.getElementById('costCompChart').getContext('2d');
+  if (costCompChart) costCompChart.destroy();
+
+  const t = data.total;
+  const varTotal = t.varTotal || 0;
+  const labTotal = t.labTotal || 0;
+  const uberComm = t.uberComm || 0;
+  const remaining = Math.max(0, (t.sales || 0) - varTotal - labTotal - uberComm);
+
+  costCompChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['変動費', '人件費', 'Uber手数料', '利益(残)'],
+      datasets: [{
+        data: [varTotal, labTotal, uberComm, remaining],
+        backgroundColor: ['#FBBC04', '#EA4335', '#FF6D01', '#34A853'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '55%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            font: { family: "'Noto Sans JP', sans-serif", size: 12 },
+            padding: 16,
+            usePointStyle: true,
+            pointStyle: 'circle'
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const sales = data.total.sales || 1;
+              const pct = ((ctx.raw / sales) * 100).toFixed(1);
+              return `${ctx.label}: ¥${ctx.raw.toLocaleString()} (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}

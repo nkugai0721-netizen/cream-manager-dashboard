@@ -314,6 +314,10 @@ body {
   height: 300px;
 }
 
+.chart-card__canvas--short {
+  height: 260px;
+}
+
 /* --- Store Table --- */
 .table-card {
   background: var(--color-bg-card);
