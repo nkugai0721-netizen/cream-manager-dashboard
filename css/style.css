@@ -712,7 +712,7 @@ body {
   border-radius: var(--radius);
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
   width: 95%;
-  max-width: 720px;
+  max-width: 900px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -775,6 +775,10 @@ body {
 
 .modal__table-wrap {
   overflow-x: auto;
+}
+
+.modal__table td:nth-child(2) input {
+  min-width: 120px;
 }
 
 .modal__table input {
