@@ -383,6 +383,11 @@ body {
   color: var(--color-text-muted);
   margin-top: 6px;
 }
+.kpi-card__note {
+  font-size: 0.72rem;
+  color: #e67e22;
+  margin-top: 4px;
+}
 
 .kpi-card--warning .kpi-card__value { color: var(--color-warning); }
 .kpi-card--danger .kpi-card__value { color: var(--color-danger); }

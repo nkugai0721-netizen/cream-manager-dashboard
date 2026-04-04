@@ -257,6 +257,17 @@ function renderDailyView(data) {
     if (drinkCostRatio > drinkThreshold * 1.15) drinkCard.classList.add('kpi-card--danger');
     else if (drinkCostRatio > drinkThreshold) drinkCard.classList.add('kpi-card--warning');
   }
+
+  // 5) 原価入力状況（せんべろ・GARAGEのみ）
+  const costNote = document.getElementById('kpi-cost-note');
+  costNote.textContent = '';
+  if (s.costDataDate && daily.length > 0) {
+    const lastSalesDate = daily[daily.length - 1].date;
+    if (s.costDataDate !== lastSalesDate) {
+      const cd = new Date(s.costDataDate);
+      costNote.textContent = `※${cd.getMonth() + 1}/${cd.getDate()}まで入力済み`;
+    }
+  }
 }
 
 // ===== 画面2: SNS・集客 =====
