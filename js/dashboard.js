@@ -141,25 +141,44 @@ function renderDailyView(data) {
     }
   }
 
-  // 昨日の売上
-  const yesterdaySales = daily.length > 0 ? daily[daily.length - 1].sales : null;
-  const dailyTarget = targets ? (targets.monthlySales / 30) : null;
-  document.getElementById('daily-yesterday-sales').textContent = fmtYen(yesterdaySales);
+  // 最新日のデータを取得（Talknote日報ベースなので当日データはない）
+  const lastDay = daily.length > 0 ? daily[daily.length - 1] : null;
+  const lastDaySales = lastDay ? lastDay.sales : null;
+
+  // ラベルに実際の日付を表示（例: "4/3(木)の売上"）
+  const salesLabel = document.getElementById('daily-sales-label');
+  if (lastDay && lastDay.date) {
+    const d = new Date(lastDay.date);
+    const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+    salesLabel.textContent = `${d.getMonth() + 1}/${d.getDate()}(${dayNames[d.getDay()]})の売上`;
+  } else if (lastDay && lastDay.day) {
+    // dayが数値（日にち）の場合
+    salesLabel.textContent = `${lastDay.day}日の売上`;
+  } else {
+    salesLabel.textContent = '最新日の売上';
+  }
+
+  // 日次目標（月間目標 ÷ 営業日数。営業日数未設定ならカレンダー日数で概算）
+  const bizDays = (targets && targets.businessDays > 0)
+    ? targets.businessDays
+    : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+  const dailyTarget = targets ? Math.round(targets.monthlySales / bizDays) : null;
+  document.getElementById('daily-yesterday-sales').textContent = fmtYen(lastDaySales);
   document.getElementById('daily-target').textContent = fmtYen(dailyTarget);
 
   // 日次プログレスバー
-  const dailyPct = (yesterdaySales && dailyTarget && dailyTarget > 0)
-    ? Math.min(Math.round((yesterdaySales / dailyTarget) * 100), 150) : 0;
+  const dailyPct = (lastDaySales && dailyTarget && dailyTarget > 0)
+    ? Math.min(Math.round((lastDaySales / dailyTarget) * 100), 150) : 0;
   const dailyProgress = document.getElementById('daily-progress');
   dailyProgress.style.width = Math.min(dailyPct, 100) + '%';
   dailyProgress.className = 'progress-bar__fill ' + progressColor(dailyPct);
 
   // 客数 / 客単価 + 先週比
-  const yesterdayGuests = daily.length > 0 ? daily[daily.length - 1].guests : null;
-  const yesterdayAvgPrice = (yesterdaySales && yesterdayGuests && yesterdayGuests > 0)
-    ? Math.round(yesterdaySales / yesterdayGuests) : null;
-  const guestStr = yesterdayGuests != null ? `${yesterdayGuests}名` : '--';
-  const priceStr = yesterdayAvgPrice != null ? fmtYen(yesterdayAvgPrice) : '--';
+  const lastGuests = lastDay ? lastDay.guests : null;
+  const lastAvgPrice = (lastDaySales && lastGuests && lastGuests > 0)
+    ? Math.round(lastDaySales / lastGuests) : null;
+  const guestStr = lastGuests != null ? `${lastGuests}名` : '--';
+  const priceStr = lastAvgPrice != null ? fmtYen(lastAvgPrice) : '--';
   document.getElementById('daily-guests-price').textContent = `${guestStr} / ${priceStr}`;
 
   // 先週同曜日比（7日前のデータがあれば）
@@ -169,13 +188,15 @@ function renderDailyView(data) {
     const prevGuests = prevDay ? prevDay.guests : null;
     const prevPrice = (prevDay && prevDay.sales && prevDay.guests > 0)
       ? Math.round(prevDay.sales / prevDay.guests) : null;
-    wowEl.innerHTML = `先週同曜日比 客数${wowBadge(yesterdayGuests, prevGuests)} 客単価${wowBadge(yesterdayAvgPrice, prevPrice)}`;
+    wowEl.innerHTML = `先週同曜日比 客数${wowBadge(lastGuests, prevGuests)} 客単価${wowBadge(lastAvgPrice, prevPrice)}`;
   } else {
     wowEl.innerHTML = '';
   }
 
-  // 月次累計
-  const mtd = daily.reduce((s, d) => s + (d.sales || 0), 0);
+  // 月次累計（dailyデータがあればそこから、なければ月次totalから）
+  const mtd = daily.length > 0
+    ? daily.reduce((s, d) => s + (d.sales || 0), 0)
+    : (storeObj ? (storeObj.sales || 0) : 0);
   const monthlyTarget = targets ? targets.monthlySales : null;
   const landing = forecast ? forecast.landing : null;
   document.getElementById('daily-mtd').textContent = fmtYen(mtd);
@@ -748,7 +769,8 @@ function renderTargetForm() {
       <td><input type="number" data-store="${s.key}" data-field="foodCostRatio" value="${t ? (t.foodCostRatio * 100).toFixed(0) : 28}" step="0.1" placeholder="28"></td>
       <td><input type="number" data-store="${s.key}" data-field="laborCostRatio" value="${t ? (t.laborCostRatio * 100).toFixed(0) : 27}" step="0.1" placeholder="27"></td>
       <td><input type="number" data-store="${s.key}" data-field="avgPrice" value="${t ? t.avgPrice : 0}" placeholder="0"></td>
-      <td><input type="number" data-store="${s.key}" data-field="guestCount" value="${t ? t.guestCount : 0}" placeholder="0"></td>`;
+      <td><input type="number" data-store="${s.key}" data-field="guestCount" value="${t ? t.guestCount : 0}" placeholder="0"></td>
+      <td><input type="number" data-store="${s.key}" data-field="businessDays" value="${t ? t.businessDays : 25}" min="1" max="31" placeholder="25"></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -778,7 +800,8 @@ async function saveTargets() {
       foodCostRatio: getVal('foodCostRatio'),
       laborCostRatio: getVal('laborCostRatio'),
       avgPrice: getVal('avgPrice'),
-      guestCount: getVal('guestCount')
+      guestCount: getVal('guestCount'),
+      businessDays: getVal('businessDays')
     };
   });
 

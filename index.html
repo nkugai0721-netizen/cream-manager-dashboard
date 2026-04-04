@@ -84,7 +84,7 @@
           <!-- Yesterday's Sales -->
           <div class="kpi-grid kpi-grid--2col">
             <div class="kpi-card kpi-card--wide">
-              <div class="kpi-card__label">昨日の売上</div>
+              <div class="kpi-card__label" id="daily-sales-label">最新日の売上</div>
               <div class="kpi-card__value" id="daily-yesterday-sales">--</div>
               <div class="kpi-card__sub">日次目標 <span id="daily-target">--</span></div>
               <div class="progress-bar">
@@ -323,6 +323,7 @@
                   <th>人件費率(%)</th>
                   <th>客単価目標</th>
                   <th>客数目標</th>
+                  <th>営業日数</th>
                 </tr>
               </thead>
               <tbody id="targetTableBody"></tbody>
