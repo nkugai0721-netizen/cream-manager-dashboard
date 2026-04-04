@@ -84,7 +84,7 @@ function renderStoreChart(data) {
   });
 }
 
-// FL比率の横棒グラフ
+// FL比率の横棒グラフ（目標55%ライン付き）
 let flChart = null;
 
 function renderFLChart(data) {
@@ -142,7 +142,9 @@ function renderFLChart(data) {
           font: { size: 11, weight: '700', family: "'Montserrat', sans-serif" },
           color: '#fff',
           formatter: (v) => `${v}%`
-        }
+        },
+        // FL目標55%の縦線アノテーション
+        annotation: undefined
       },
       scales: {
         x: {
@@ -157,7 +159,33 @@ function renderFLChart(data) {
           grid: { display: false }
         }
       }
-    }
+    },
+    plugins: [{
+      // カスタムプラグイン: FL目標55%ラインを描画
+      id: 'flTargetLine',
+      afterDraw(chart) {
+        const xScale = chart.scales.x;
+        const yScale = chart.scales.y;
+        const ctx = chart.ctx;
+        const xPos = xScale.getPixelForValue(55);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([6, 4]);
+        ctx.strokeStyle = '#F44336';
+        ctx.lineWidth = 2;
+        ctx.moveTo(xPos, yScale.top);
+        ctx.lineTo(xPos, yScale.bottom);
+        ctx.stroke();
+
+        // ラベル
+        ctx.fillStyle = '#F44336';
+        ctx.font = "bold 11px 'Montserrat', sans-serif";
+        ctx.textAlign = 'center';
+        ctx.fillText('目標55%', xPos, yScale.top - 6);
+        ctx.restore();
+      }
+    }]
   });
 }
 

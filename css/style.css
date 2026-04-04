@@ -1,6 +1,6 @@
 /* ========================================
-   CREAM 責任者ダッシュボード
-   cream-group-site のデザインパターンを踏襲
+   CREAM 責任者ダッシュボード v2
+   3タブ構成: 今日の数字 / SNS・集客 / 月次P&L
    ======================================== */
 
 /* --- Reset & Base --- */
@@ -197,6 +197,87 @@ body {
   font-size: 0.8rem;
 }
 
+/* --- Tab Navigation --- */
+.tab-nav {
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 60px;
+  z-index: 99;
+}
+
+.tab-nav__inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  gap: 0;
+  padding: 0 24px;
+}
+
+.tab-nav__btn {
+  padding: 14px 24px;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-ja);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  position: relative;
+  transition: color var(--transition);
+}
+
+.tab-nav__btn:hover {
+  color: var(--color-text);
+}
+
+.tab-nav__btn--active {
+  color: var(--color-primary);
+}
+
+.tab-nav__btn--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-primary);
+  border-radius: 3px 3px 0 0;
+}
+
+/* --- Store Filter Pills --- */
+.store-filter {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.store-filter__btn {
+  padding: 8px 18px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 50px;
+  background: var(--color-bg-card);
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: var(--font-ja);
+  color: var(--color-text-light);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.store-filter__btn:hover {
+  border-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.store-filter__btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
 /* --- Container --- */
 .container {
   max-width: var(--max-width);
@@ -251,6 +332,15 @@ body {
   margin-bottom: 24px;
 }
 
+.kpi-grid--2col {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.kpi-grid--3col {
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 0;
+}
+
 .kpi-card {
   background: var(--color-bg-card);
   border-radius: var(--radius);
@@ -262,6 +352,10 @@ body {
 
 .kpi-card:hover {
   box-shadow: var(--shadow-hover);
+}
+
+.kpi-card--wide {
+  padding: 28px 24px;
 }
 
 .kpi-card__icon {
@@ -284,8 +378,161 @@ body {
   font-weight: 500;
 }
 
+.kpi-card__sub {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+}
+
 .kpi-card--warning .kpi-card__value { color: var(--color-warning); }
 .kpi-card--danger .kpi-card__value { color: var(--color-danger); }
+
+/* --- KPI Mini (inside chart-card) --- */
+.kpi-mini {
+  text-align: center;
+  padding: 12px 8px;
+}
+
+.kpi-mini__label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.kpi-mini__value {
+  font-family: var(--font-en);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* --- Progress Bar --- */
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #E8EAF6;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  border-radius: 6px;
+  background: var(--color-primary);
+  transition: width 0.6s ease, background-color 0.3s ease;
+}
+
+.progress-bar__fill--green {
+  background: var(--color-success);
+}
+
+.progress-bar__fill--yellow {
+  background: var(--color-warning);
+}
+
+.progress-bar__fill--red {
+  background: var(--color-danger);
+}
+
+/* --- WoW Badge (Week-over-Week) --- */
+.wow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: var(--font-en);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.wow-badge--up {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+
+.wow-badge--down {
+  background: #FFEBEE;
+  color: #C62828;
+}
+
+.wow-badge--flat {
+  background: #F5F5F5;
+  color: #757575;
+}
+
+/* --- Suggestion Cards --- */
+.suggestion-section {
+  margin-bottom: 24px;
+}
+
+.suggestion-section__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--color-text);
+}
+
+.suggestion-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.suggestion-card__icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.suggestion-card__body {
+  flex: 1;
+}
+
+.suggestion-card__title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.suggestion-card__desc {
+  color: var(--color-text-light);
+  font-size: 0.82rem;
+}
+
+.suggestion-card--danger {
+  background: #FFF3F3;
+  border-left: 4px solid var(--color-danger);
+}
+
+.suggestion-card--warning {
+  background: #FFF8E1;
+  border-left: 4px solid var(--color-warning);
+}
+
+.suggestion-card--info {
+  background: #E8EAF6;
+  border-left: 4px solid var(--color-primary-light);
+}
+
+/* --- Signal Badge (判定) --- */
+.signal-badge {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.signal-badge--green { background: var(--color-success); }
+.signal-badge--yellow { background: var(--color-warning); }
+.signal-badge--red { background: var(--color-danger); }
+.signal-badge--gray { background: #BDBDBD; }
 
 /* --- Chart Section --- */
 .chart-grid {
@@ -397,6 +644,17 @@ body {
 
 .cell--warning { color: var(--color-warning); font-weight: 700; }
 .cell--danger { color: var(--color-danger); font-weight: 700; }
+.cell--success { color: var(--color-success); font-weight: 700; }
+
+/* --- Tab Panel --- */
+.tab-panel {
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 /* --- Section Divider --- */
 .section-divider {
@@ -428,21 +686,31 @@ body {
 /* --- Responsive --- */
 @media (max-width: 1024px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .kpi-grid--3col { grid-template-columns: repeat(3, 1fr); }
   .chart-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
   .dash-header__inner { flex-direction: column; align-items: flex-start; gap: 8px; }
   .dash-header__right { width: 100%; justify-content: space-between; }
+  .tab-nav { top: auto; position: relative; }
+  .tab-nav__inner { padding: 0 16px; }
+  .tab-nav__btn { padding: 12px 16px; font-size: 0.82rem; }
   .kpi-card__value { font-size: 1.4rem; }
+  .kpi-mini__value { font-size: 1.1rem; }
   .container { padding: 16px; }
   .login__card { margin: 16px; padding: 32px 24px; }
+  .store-filter { gap: 6px; }
+  .store-filter__btn { padding: 6px 14px; font-size: 0.78rem; }
 }
 
 @media (max-width: 480px) {
   .kpi-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .kpi-grid--2col { grid-template-columns: 1fr; }
+  .kpi-grid--3col { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
   .kpi-card { padding: 16px 12px; }
   .kpi-card__value { font-size: 1.2rem; }
   .kpi-card__icon { font-size: 1.4rem; }
   .chart-card__canvas { height: 240px; }
+  .suggestion-card { padding: 12px 14px; }
 }

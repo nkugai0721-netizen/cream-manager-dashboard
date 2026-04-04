@@ -44,6 +44,15 @@
       </div>
     </header>
 
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+      <div class="tab-nav__inner">
+        <button class="tab-nav__btn tab-nav__btn--active" data-tab="daily">今日の数字</button>
+        <button class="tab-nav__btn" data-tab="sns">SNS・集客</button>
+        <button class="tab-nav__btn" data-tab="monthly">月次P&L</button>
+      </div>
+    </nav>
+
     <!-- Content -->
     <main class="container">
 
@@ -59,147 +68,232 @@
       <!-- Dashboard Content -->
       <div id="dashContent" style="display:none;">
 
-        <!-- KPI Cards -->
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-card__icon">📊</div>
-            <div class="kpi-card__value" id="kpi-sales">--</div>
-            <div class="kpi-card__label">全店総売上</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-card__icon">👥</div>
-            <div class="kpi-card__value" id="kpi-guests">--</div>
-            <div class="kpi-card__label">全店客数</div>
-          </div>
-          <div class="kpi-card" id="kpi-fl-wrapper">
-            <div class="kpi-card__icon">⚖️</div>
-            <div class="kpi-card__value" id="kpi-fl">--</div>
-            <div class="kpi-card__label">FL比率</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-card__icon">💰</div>
-            <div class="kpi-card__value" id="kpi-avg-price">--</div>
-            <div class="kpi-card__label">平均客単価</div>
-          </div>
-        </div>
+        <!-- ==================== Tab 1: 今日の数字 ==================== -->
+        <div id="tab-daily" class="tab-panel">
 
-        <!-- Charts Row 1 -->
-        <div class="chart-grid">
-          <div class="chart-card">
-            <div class="chart-card__title">店舗別 売上・変動費・人件費</div>
-            <div class="chart-card__canvas">
-              <canvas id="storeChart"></canvas>
+          <!-- Store Filter -->
+          <div class="store-filter" id="storeFilter">
+            <button class="store-filter__btn store-filter__btn--active" data-store="all">全店</button>
+            <button class="store-filter__btn" data-store="せんべろ本店">せんべろ</button>
+            <button class="store-filter__btn" data-store="SAN DRIP GARAGE">GARAGE</button>
+            <button class="store-filter__btn" data-store="Leje">Leje</button>
+            <button class="store-filter__btn" data-store="ちゃっきー">ちゃっきー</button>
+          </div>
+
+          <!-- Yesterday's Sales -->
+          <div class="kpi-grid kpi-grid--2col">
+            <div class="kpi-card kpi-card--wide">
+              <div class="kpi-card__label">昨日の売上</div>
+              <div class="kpi-card__value" id="daily-yesterday-sales">--</div>
+              <div class="kpi-card__sub">日次目標 <span id="daily-target">--</span></div>
+              <div class="progress-bar">
+                <div class="progress-bar__fill" id="daily-progress" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="kpi-card kpi-card--wide">
+              <div class="kpi-card__label">客数 / 客単価</div>
+              <div class="kpi-card__value" id="daily-guests-price">--</div>
+              <div class="kpi-card__sub" id="daily-wow-guest"></div>
             </div>
           </div>
+
+          <!-- Monthly Cumulative -->
           <div class="chart-card">
-            <div class="chart-card__title">FL比率（変動費率 + 人件費率）</div>
-            <div class="chart-card__canvas">
-              <canvas id="flChart"></canvas>
+            <div class="chart-card__title">月次累計 vs 目標</div>
+            <div class="kpi-grid kpi-grid--3col">
+              <div class="kpi-mini">
+                <div class="kpi-mini__label">累計実績</div>
+                <div class="kpi-mini__value" id="daily-mtd">--</div>
+              </div>
+              <div class="kpi-mini">
+                <div class="kpi-mini__label">月間目標</div>
+                <div class="kpi-mini__value" id="daily-monthly-target">--</div>
+              </div>
+              <div class="kpi-mini">
+                <div class="kpi-mini__label">着地見込</div>
+                <div class="kpi-mini__value" id="daily-landing">--</div>
+              </div>
+            </div>
+            <div class="progress-bar" style="margin-top:12px;">
+              <div class="progress-bar__fill" id="daily-monthly-progress" style="width:0%"></div>
+            </div>
+            <div class="kpi-card__sub" style="text-align:right;margin-top:6px;">
+              達成率 <strong id="daily-achieve-rate">--%</strong>
             </div>
           </div>
-        </div>
 
-        <!-- Charts Row 2 -->
-        <div class="chart-grid">
-          <div class="chart-card">
-            <div class="chart-card__title">売上構成比（全店合計）</div>
-            <div class="chart-card__canvas chart-card__canvas--short">
-              <canvas id="salesCompChart"></canvas>
+          <!-- Daily KPI Summary -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-card__icon">📊</div>
+              <div class="kpi-card__value" id="kpi-sales">--</div>
+              <div class="kpi-card__label">全店月間売上</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-card__icon">👥</div>
+              <div class="kpi-card__value" id="kpi-guests">--</div>
+              <div class="kpi-card__label">全店客数</div>
+            </div>
+            <div class="kpi-card" id="kpi-fl-wrapper">
+              <div class="kpi-card__icon">⚖️</div>
+              <div class="kpi-card__value" id="kpi-fl">--</div>
+              <div class="kpi-card__label">FL比率</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-card__icon">💰</div>
+              <div class="kpi-card__value" id="kpi-avg-price">--</div>
+              <div class="kpi-card__label">平均客単価</div>
             </div>
           </div>
-          <div class="chart-card">
-            <div class="chart-card__title">コスト構成比（全店合計）</div>
-            <div class="chart-card__canvas chart-card__canvas--short">
-              <canvas id="costCompChart"></canvas>
+
+        </div>
+
+        <!-- ==================== Tab 2: SNS・集客 ==================== -->
+        <div id="tab-sns" class="tab-panel" style="display:none;">
+
+          <!-- Channel Comparison Matrix -->
+          <div class="table-card">
+            <div class="table-card__title">チャネル横断比較マトリクス</div>
+            <div class="table-card__wrapper">
+              <table class="store-table" id="channelMatrix">
+                <thead>
+                  <tr>
+                    <th>店舗</th><th>チャネル</th>
+                    <th>露出</th><th>興味</th>
+                    <th>来店推定</th><th>CVR</th>
+                    <th>判定</th><th>前週比</th>
+                  </tr>
+                </thead>
+                <tbody id="channelMatrixBody"></tbody>
+              </table>
             </div>
           </div>
-        </div>
 
-        <!-- Store Table -->
-        <div class="table-card">
-          <div class="table-card__title">店舗別詳細</div>
-          <div class="table-card__wrapper">
-            <table class="store-table">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>せんべろ</th>
-                  <th>GARAGE</th>
-                  <th>Leje</th>
-                  <th>ちゃっきー</th>
-                  <th>全店合計</th>
-                </tr>
-              </thead>
-              <tbody id="storeTableBody"></tbody>
-            </table>
+          <!-- Action Suggestions -->
+          <div class="suggestion-section">
+            <div class="suggestion-section__title">自動アクション提案</div>
+            <div id="suggestionCards"></div>
           </div>
-        </div>
 
-        <!-- ========== SNS Section ========== -->
-        <div class="section-divider">
-          <div class="section-divider__label">SNS・集客チャネル</div>
-        </div>
-
-        <!-- SNS KPI Cards -->
-        <div class="kpi-grid" id="snsKpiGrid">
-          <div class="kpi-card">
-            <div class="kpi-card__icon">📱</div>
-            <div class="kpi-card__value" id="kpi-followers">--</div>
-            <div class="kpi-card__label">IG全店フォロワー</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-card__icon">👁️</div>
-            <div class="kpi-card__value" id="kpi-reach">--</div>
-            <div class="kpi-card__label">IG全店リーチ(28日)</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-card__icon">❤️</div>
-            <div class="kpi-card__value" id="kpi-eng-rate">--</div>
-            <div class="kpi-card__label">IG平均Eng率</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-card__icon">🔗</div>
-            <div class="kpi-card__value" id="kpi-web-clicks">--</div>
-            <div class="kpi-card__label">IG Webクリック(28日)</div>
-          </div>
-        </div>
-
-        <!-- SNS Chart -->
-        <div class="chart-grid">
-          <div class="chart-card">
-            <div class="chart-card__title">店舗別 IGリーチ・フォロワー</div>
-            <div class="chart-card__canvas chart-card__canvas--short">
-              <canvas id="snsReachChart"></canvas>
+          <!-- SNS KPI Cards -->
+          <div class="kpi-grid" id="snsKpiGrid">
+            <div class="kpi-card">
+              <div class="kpi-card__icon">📱</div>
+              <div class="kpi-card__value" id="kpi-followers">--</div>
+              <div class="kpi-card__label">IG全店フォロワー</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-card__icon">👁️</div>
+              <div class="kpi-card__value" id="kpi-reach">--</div>
+              <div class="kpi-card__label">IG全店リーチ(28日)</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-card__icon">❤️</div>
+              <div class="kpi-card__value" id="kpi-eng-rate">--</div>
+              <div class="kpi-card__label">IG平均Eng率</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-card__icon">🔗</div>
+              <div class="kpi-card__value" id="kpi-web-clicks">--</div>
+              <div class="kpi-card__label">IG Webクリック(28日)</div>
             </div>
           </div>
-          <div class="chart-card">
-            <div class="chart-card__title">店舗別 IGエンゲージメント率</div>
-            <div class="chart-card__canvas chart-card__canvas--short">
-              <canvas id="snsEngChart"></canvas>
+
+          <!-- SNS Charts -->
+          <div class="chart-grid">
+            <div class="chart-card">
+              <div class="chart-card__title">店舗別 IGリーチ・フォロワー</div>
+              <div class="chart-card__canvas chart-card__canvas--short">
+                <canvas id="snsReachChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card__title">店舗別 IGエンゲージメント率</div>
+              <div class="chart-card__canvas chart-card__canvas--short">
+                <canvas id="snsEngChart"></canvas>
+              </div>
             </div>
           </div>
+
+          <!-- SNS Table -->
+          <div class="table-card">
+            <div class="table-card__title">SNS詳細データ</div>
+            <div class="table-card__wrapper">
+              <table class="store-table" id="snsTable">
+                <thead id="snsTableHead"></thead>
+                <tbody id="snsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Ad Media Table -->
+          <div class="table-card" id="adTableCard">
+            <div class="table-card__title">広告媒体・予約</div>
+            <div class="table-card__wrapper">
+              <table class="store-table" id="adTable">
+                <thead id="adTableHead"></thead>
+                <tbody id="adTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
 
-        <!-- SNS Table -->
-        <div class="table-card">
-          <div class="table-card__title">SNS詳細データ</div>
-          <div class="table-card__wrapper">
-            <table class="store-table" id="snsTable">
-              <thead id="snsTableHead"></thead>
-              <tbody id="snsTableBody"></tbody>
-            </table>
-          </div>
-        </div>
+        <!-- ==================== Tab 3: 月次P&L ==================== -->
+        <div id="tab-monthly" class="tab-panel" style="display:none;">
 
-        <!-- Ad Media Table -->
-        <div class="table-card" id="adTableCard">
-          <div class="table-card__title">広告媒体・予約</div>
-          <div class="table-card__wrapper">
-            <table class="store-table" id="adTable">
-              <thead id="adTableHead"></thead>
-              <tbody id="adTableBody"></tbody>
-            </table>
+          <!-- Charts Row 1 -->
+          <div class="chart-grid">
+            <div class="chart-card">
+              <div class="chart-card__title">店舗別 売上・変動費・人件費</div>
+              <div class="chart-card__canvas">
+                <canvas id="storeChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card__title">FL比率（目標55%以下）</div>
+              <div class="chart-card__canvas">
+                <canvas id="flChart"></canvas>
+              </div>
+            </div>
           </div>
+
+          <!-- Charts Row 2 -->
+          <div class="chart-grid">
+            <div class="chart-card">
+              <div class="chart-card__title">売上構成比（全店合計）</div>
+              <div class="chart-card__canvas chart-card__canvas--short">
+                <canvas id="salesCompChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card__title">コスト構成比（全店合計）</div>
+              <div class="chart-card__canvas chart-card__canvas--short">
+                <canvas id="costCompChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Store Table -->
+          <div class="table-card">
+            <div class="table-card__title">店舗別詳細</div>
+            <div class="table-card__wrapper">
+              <table class="store-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>せんべろ</th>
+                    <th>GARAGE</th>
+                    <th>Leje</th>
+                    <th>ちゃっきー</th>
+                    <th>全店合計</th>
+                  </tr>
+                </thead>
+                <tbody id="storeTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
 
       </div>
