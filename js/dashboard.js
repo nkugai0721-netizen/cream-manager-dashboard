@@ -672,11 +672,6 @@ async function loadDashboard(nocache = false) {
     const data = await fetchDashboardData(nocache);
     dashData = data;
 
-    // デバッグ: GAS側の診断情報を表示
-    const dbg = data._debug || {};
-    const tDbg = `targets件数=${dbg.count} | sheet=${dbg.sheetExists} | lastRow=${dbg.lastRow} | curYM=${dbg.curYM} | col1type=${dbg.row2_col1type} | col1val=${dbg.row2_col1val} | err=${dbg.error||'none'}`;
-    showError('DEBUG: ' + tDbg);
-
     // ヘッダー
     renderHeader(data);
 
