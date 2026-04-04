@@ -125,9 +125,9 @@ function renderDailyView(data) {
 
   if (store === 'all') {
     storeObj = data.total;
-    daily = data.totalDaily || [];
-    targets = data.totalTargets || null;
-    forecast = data.totalForecast || null;
+    daily = (data.total && data.total.daily) ? data.total.daily : [];
+    targets = (data.total && data.total.targets) ? data.total.targets : null;
+    forecast = (data.total && data.total.forecast) ? data.total.forecast : null;
   } else {
     storeObj = data.stores[store];
     if (storeObj) {
