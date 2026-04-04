@@ -213,18 +213,48 @@ function renderDailyView(data) {
   monthlyProgress.className = 'progress-bar__fill ' + progressColor(achieveRate);
   document.getElementById('daily-achieve-rate').textContent = achieveRate + '%';
 
-  // 全店KPIカード（常に全店を表示）
-  const t = data.total;
-  document.getElementById('kpi-sales').textContent = fmtYen(t.sales);
-  document.getElementById('kpi-guests').textContent = fmtNum(t.guests) + '名';
-  document.getElementById('kpi-fl').textContent = fmtPct(t.flRatio);
-  document.getElementById('kpi-avg-price').textContent = fmtYen(t.avgPrice);
+  // 店舗別KPIカード（選択中の店舗データで表示）
+  const s = storeObj || data.total;
+  const tgt = targets;
 
-  // FL比率アラート（目標55%）
-  const flCard = document.getElementById('kpi-fl-wrapper');
-  flCard.classList.remove('kpi-card--danger', 'kpi-card--warning');
-  if (t.flRatio > 0.60) flCard.classList.add('kpi-card--danger');
-  else if (t.flRatio > 0.55) flCard.classList.add('kpi-card--warning');
+  // 1) 日平均売上高
+  const operatedDays = daily.length || 1;
+  const dailyAvgSales = s.sales > 0 ? Math.round(s.sales / operatedDays) : 0;
+  document.getElementById('kpi-daily-avg').textContent = fmtYen(dailyAvgSales);
+  const dailyAvgTarget = (tgt && tgt.businessDays > 0) ? Math.round(tgt.monthlySales / tgt.businessDays) : null;
+  document.getElementById('kpi-daily-avg-target').textContent = dailyAvgTarget ? `目標 ${fmtYen(dailyAvgTarget)}` : '';
+
+  // 2) 客数・客単価
+  const totalGuests = s.guests || 0;
+  const avgPrice = (s.sales > 0 && totalGuests > 0) ? Math.round(s.sales / totalGuests) : 0;
+  document.getElementById('kpi-guests-price').textContent = `${fmtNum(totalGuests)}名 / ${fmtYen(avgPrice)}`;
+  const tgtPrice = (tgt && tgt.avgPrice > 0) ? `目標単価 ${fmtYen(tgt.avgPrice)}` : '';
+  document.getElementById('kpi-guests-price-target').textContent = tgtPrice;
+
+  // 3) 食材原価率
+  const foodCostRatio = (s.sales > 0 && s.foodCost != null) ? s.foodCost / s.sales : null;
+  document.getElementById('kpi-food-cost').textContent = foodCostRatio != null ? fmtPct(foodCostRatio) : '-';
+  const foodTarget = (tgt && tgt.foodCostRatio > 0) ? `目標 ${(tgt.foodCostRatio * 100).toFixed(0)}%` : '目標 28%';
+  document.getElementById('kpi-food-cost-target').textContent = foodTarget;
+  const foodCard = document.getElementById('kpi-food-wrapper');
+  foodCard.classList.remove('kpi-card--danger', 'kpi-card--warning');
+  if (foodCostRatio != null) {
+    if (foodCostRatio > 0.32) foodCard.classList.add('kpi-card--danger');
+    else if (foodCostRatio > 0.28) foodCard.classList.add('kpi-card--warning');
+  }
+
+  // 4) ドリンク原価率
+  const drinkCostRatio = (s.sales > 0 && s.drinkCost != null) ? s.drinkCost / s.sales : null;
+  document.getElementById('kpi-drink-cost').textContent = drinkCostRatio != null ? fmtPct(drinkCostRatio) : '-';
+  const drinkTarget = (tgt && tgt.drinkCostRatio > 0) ? `目標 ${(tgt.drinkCostRatio * 100).toFixed(0)}%` : '';
+  document.getElementById('kpi-drink-cost-target').textContent = drinkTarget;
+  const drinkCard = document.getElementById('kpi-drink-wrapper');
+  drinkCard.classList.remove('kpi-card--danger', 'kpi-card--warning');
+  if (drinkCostRatio != null) {
+    const drinkThreshold = (tgt && tgt.drinkCostRatio > 0) ? tgt.drinkCostRatio : 0.15;
+    if (drinkCostRatio > drinkThreshold * 1.15) drinkCard.classList.add('kpi-card--danger');
+    else if (drinkCostRatio > drinkThreshold) drinkCard.classList.add('kpi-card--warning');
+  }
 }
 
 // ===== 画面2: SNS・集客 =====

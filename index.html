@@ -123,27 +123,31 @@
             </div>
           </div>
 
-          <!-- Daily KPI Summary -->
+          <!-- Daily KPI Summary (店舗別) -->
           <div class="kpi-grid">
             <div class="kpi-card">
               <div class="kpi-card__icon">📊</div>
-              <div class="kpi-card__value" id="kpi-sales">--</div>
-              <div class="kpi-card__label">全店月間売上</div>
+              <div class="kpi-card__value" id="kpi-daily-avg">--</div>
+              <div class="kpi-card__sub" id="kpi-daily-avg-target"></div>
+              <div class="kpi-card__label">日平均売上高</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-card__icon">👥</div>
-              <div class="kpi-card__value" id="kpi-guests">--</div>
-              <div class="kpi-card__label">全店客数</div>
+              <div class="kpi-card__value" id="kpi-guests-price">--</div>
+              <div class="kpi-card__sub" id="kpi-guests-price-target"></div>
+              <div class="kpi-card__label">客数・客単価</div>
             </div>
-            <div class="kpi-card" id="kpi-fl-wrapper">
-              <div class="kpi-card__icon">⚖️</div>
-              <div class="kpi-card__value" id="kpi-fl">--</div>
-              <div class="kpi-card__label">FL比率</div>
+            <div class="kpi-card" id="kpi-food-wrapper">
+              <div class="kpi-card__icon">🥩</div>
+              <div class="kpi-card__value" id="kpi-food-cost">--</div>
+              <div class="kpi-card__sub" id="kpi-food-cost-target"></div>
+              <div class="kpi-card__label">食材原価率</div>
             </div>
-            <div class="kpi-card">
-              <div class="kpi-card__icon">💰</div>
-              <div class="kpi-card__value" id="kpi-avg-price">--</div>
-              <div class="kpi-card__label">平均客単価</div>
+            <div class="kpi-card" id="kpi-drink-wrapper">
+              <div class="kpi-card__icon">🍸</div>
+              <div class="kpi-card__value" id="kpi-drink-cost">--</div>
+              <div class="kpi-card__sub" id="kpi-drink-cost-target"></div>
+              <div class="kpi-card__label">ドリンク原価率</div>
             </div>
           </div>
 
@@ -348,10 +352,10 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2/dist/chartjs-plugin-datalabels.min.js"></script>
-  <script src="js/auth.js?v=4"></script>
-  <script src="js/api.js?v=4"></script>
-  <script src="js/chart.js?v=4"></script>
-  <script src="js/dashboard.js?v=4"></script>
+  <script src="js/auth.js?v=5"></script>
+  <script src="js/api.js?v=5"></script>
+  <script src="js/chart.js?v=5"></script>
+  <script src="js/dashboard.js?v=5"></script>
 
 </body>
 </html>
