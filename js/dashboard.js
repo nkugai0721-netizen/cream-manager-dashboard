@@ -224,10 +224,11 @@ function renderDailyView(data) {
   const dailyAvgTarget = (tgt && tgt.businessDays > 0) ? Math.round(tgt.monthlySales / tgt.businessDays) : null;
   document.getElementById('kpi-daily-avg-target').textContent = dailyAvgTarget ? `目標 ${fmtYen(dailyAvgTarget)}` : '';
 
-  // 2) 客数・客単価
+  // 2) 日平均客数・客単価
   const totalGuests = s.guests || 0;
+  const avgGuestsPerDay = operatedDays > 0 ? Math.round(totalGuests / operatedDays) : 0;
   const avgPrice = (s.sales > 0 && totalGuests > 0) ? Math.round(s.sales / totalGuests) : 0;
-  document.getElementById('kpi-guests-price').textContent = `${fmtNum(totalGuests)}名 / ${fmtYen(avgPrice)}`;
+  document.getElementById('kpi-guests-price').textContent = `${fmtNum(avgGuestsPerDay)}名/日 / ${fmtYen(avgPrice)}`;
   const tgtPrice = (tgt && tgt.avgPrice > 0) ? `目標単価 ${fmtYen(tgt.avgPrice)}` : '';
   document.getElementById('kpi-guests-price-target').textContent = tgtPrice;
 
