@@ -672,6 +672,12 @@ async function loadDashboard(nocache = false) {
     const data = await fetchDashboardData(nocache);
     dashData = data;
 
+    // デバッグ: targetsが取得できているか確認
+    const tDbg = data.stores ? Object.keys(data.stores).map(k =>
+      k + ': targets=' + (data.stores[k].targets ? JSON.stringify(data.stores[k].targets) : 'null')
+    ).join('\n') : 'stores なし';
+    console.log('[DEBUG targets]', tDbg);
+
     // ヘッダー
     renderHeader(data);
 
