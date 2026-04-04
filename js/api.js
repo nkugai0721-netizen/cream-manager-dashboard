@@ -10,7 +10,6 @@ async function saveTargetsData(month, targets) {
 
   const res = await fetch(API_CONFIG.baseUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'saveTargets', token: token, month: month, targets: targets })
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
