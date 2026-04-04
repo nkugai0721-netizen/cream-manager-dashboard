@@ -229,7 +229,7 @@ function renderDailyView(data) {
   const avgGuestsPerDay = operatedDays > 0 ? Math.round(totalGuests / operatedDays) : 0;
   const avgPrice = (s.sales > 0 && totalGuests > 0) ? Math.round(s.sales / totalGuests) : 0;
   document.getElementById('kpi-guests-price').textContent = `${fmtNum(avgGuestsPerDay)}名 / ${fmtYen(avgPrice)}`;
-  const tgtGuestStr = (tgt && tgt.guestCount > 0) ? `目標客数 ${fmtNum(Math.round(tgt.guestCount / (tgt.businessDays || 25)))}名` : '';
+  const tgtGuestStr = (tgt && tgt.guestCount > 0) ? `目標客数 ${fmtNum(tgt.guestCount)}名` : '';
   const tgtPriceStr = (tgt && tgt.avgPrice > 0) ? `目標単価 ${fmtYen(tgt.avgPrice)}` : '';
   document.getElementById('kpi-guests-price-target').textContent = [tgtGuestStr, tgtPriceStr].filter(Boolean).join(' / ');
 
