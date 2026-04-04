@@ -28,7 +28,7 @@ async function fetchDashboardData() {
   const token = getToken();
   if (!token) throw new Error('認証トークンがありません');
 
-  const url = `${API_CONFIG.baseUrl}?action=getDashboard&token=${encodeURIComponent(token)}`;
+  const url = `${API_CONFIG.baseUrl}?action=getDashboard&token=${encodeURIComponent(token)}&_t=${Date.now()}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
