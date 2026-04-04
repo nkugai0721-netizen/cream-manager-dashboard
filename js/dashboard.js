@@ -665,11 +665,11 @@ function renderHeader(data) {
 
 // ===== メインロード =====
 
-async function loadDashboard() {
+async function loadDashboard(nocache = false) {
   showLoading(true);
   showError('');
   try {
-    const data = await fetchDashboardData();
+    const data = await fetchDashboardData(nocache);
     dashData = data;
 
     // ヘッダー
@@ -819,7 +819,7 @@ async function saveTargets() {
     // 2秒後にモーダルを閉じてダッシュボード更新
     setTimeout(() => {
       closeTargetModal();
-      loadDashboard();
+      loadDashboard(true);
     }, 1500);
   } catch (e) {
     status.textContent = 'エラー: ' + e.message;

@@ -23,12 +23,13 @@ async function saveTargetsData(month, targets) {
   return json;
 }
 
-// ダッシュボードデータ取得
-async function fetchDashboardData() {
+// ダッシュボードデータ取得（nocache=trueでGASキャッシュ強制クリア）
+async function fetchDashboardData(nocache = false) {
   const token = getToken();
   if (!token) throw new Error('認証トークンがありません');
 
-  const url = `${API_CONFIG.baseUrl}?action=getDashboard&token=${encodeURIComponent(token)}&_t=${Date.now()}`;
+  let url = `${API_CONFIG.baseUrl}?action=getDashboard&token=${encodeURIComponent(token)}&_t=${Date.now()}`;
+  if (nocache) url += '&nocache=1';
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
