@@ -672,11 +672,11 @@ async function loadDashboard(nocache = false) {
     const data = await fetchDashboardData(nocache);
     dashData = data;
 
-    // デバッグ: targetsが取得できているか確認
+    // デバッグ: targetsが取得できているか確認（画面に表示）
     const tDbg = data.stores ? Object.keys(data.stores).map(k =>
-      k + ': targets=' + (data.stores[k].targets ? JSON.stringify(data.stores[k].targets) : 'null')
-    ).join('\n') : 'stores なし';
-    console.log('[DEBUG targets]', tDbg);
+      k + ': ' + (data.stores[k].targets ? '¥' + (data.stores[k].targets.monthlySales||0).toLocaleString() : 'NULL')
+    ).join(' | ') : 'stores なし';
+    showError('DEBUG targets: ' + tDbg);
 
     // ヘッダー
     renderHeader(data);
