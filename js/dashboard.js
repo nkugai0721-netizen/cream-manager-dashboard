@@ -767,6 +767,7 @@ function renderTargetForm() {
       <td class="store-table__label">${s.label}</td>
       <td><input type="number" data-store="${s.key}" data-field="monthlySales" value="${t ? t.monthlySales : 0}" placeholder="0"></td>
       <td><input type="number" data-store="${s.key}" data-field="foodCostRatio" value="${t ? (t.foodCostRatio * 100).toFixed(0) : 28}" step="0.1" placeholder="28"></td>
+      <td><input type="number" data-store="${s.key}" data-field="drinkCostRatio" value="${t ? (t.drinkCostRatio * 100).toFixed(0) : 0}" step="0.1" placeholder="0"></td>
       <td><input type="number" data-store="${s.key}" data-field="laborCostRatio" value="${t ? (t.laborCostRatio * 100).toFixed(0) : 27}" step="0.1" placeholder="27"></td>
       <td><input type="number" data-store="${s.key}" data-field="avgPrice" value="${t ? t.avgPrice : 0}" placeholder="0"></td>
       <td><input type="number" data-store="${s.key}" data-field="guestCount" value="${t ? t.guestCount : 0}" placeholder="0"></td>
@@ -798,6 +799,7 @@ async function saveTargets() {
       store: s.key,
       monthlySales: getVal('monthlySales'),
       foodCostRatio: getVal('foodCostRatio'),
+      drinkCostRatio: getVal('drinkCostRatio'),
       laborCostRatio: getVal('laborCostRatio'),
       avgPrice: getVal('avgPrice'),
       guestCount: getVal('guestCount'),
