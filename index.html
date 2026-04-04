@@ -38,6 +38,7 @@
         </div>
         <div class="dash-header__right">
           <span class="dash-header__updated" id="updatedAt"></span>
+          <button class="dash-header__btn" id="targetBtn">目標設定</button>
           <button class="dash-header__btn" id="refreshBtn">更新</button>
           <button class="dash-header__btn dash-header__btn--logout" id="logoutBtn">ログアウト</button>
         </div>
@@ -298,6 +299,43 @@
 
       </div>
     </main>
+
+    <!-- Target Setting Modal -->
+    <div id="targetModal" class="modal" style="display:none;">
+      <div class="modal__overlay"></div>
+      <div class="modal__content">
+        <div class="modal__header">
+          <div class="modal__title">月次目標設定</div>
+          <button class="modal__close" id="targetModalClose">&times;</button>
+        </div>
+        <div class="modal__body">
+          <div class="modal__month-select">
+            <label>対象月:</label>
+            <input type="month" id="targetMonthInput" class="modal__input">
+          </div>
+          <div class="modal__table-wrap">
+            <table class="store-table modal__table">
+              <thead>
+                <tr>
+                  <th>店舗</th>
+                  <th>売上目標</th>
+                  <th>食材費率(%)</th>
+                  <th>人件費率(%)</th>
+                  <th>客単価目標</th>
+                  <th>客数目標</th>
+                </tr>
+              </thead>
+              <tbody id="targetTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <div id="targetSaveStatus" class="modal__status"></div>
+          <button class="modal__btn modal__btn--cancel" id="targetCancelBtn">キャンセル</button>
+          <button class="modal__btn modal__btn--save" id="targetSaveBtn">保存</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Footer -->
     <footer class="dash-footer">

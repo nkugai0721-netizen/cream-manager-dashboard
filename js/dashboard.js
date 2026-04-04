@@ -700,6 +700,121 @@ async function handleLogin(e) {
   }
 }
 
+// ===== 目標設定モーダル =====
+
+const TARGET_STORES = [
+  { key: 'せんべろ本店', label: 'せんべろ本店' },
+  { key: 'SAN DRIP GARAGE', label: 'SAN DRIP GARAGE' },
+  { key: 'Leje', label: 'Leje' },
+  { key: 'ちゃっきー', label: 'ちゃっきー' }
+];
+
+function openTargetModal() {
+  const modal = document.getElementById('targetModal');
+  modal.style.display = 'flex';
+
+  // 対象月を今月に設定
+  const now = new Date();
+  const monthInput = document.getElementById('targetMonthInput');
+  monthInput.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+  // テーブル行を生成（既存のtargetsデータがあればプリフィル）
+  renderTargetForm();
+
+  // ステータスリセット
+  const status = document.getElementById('targetSaveStatus');
+  status.textContent = '';
+  status.className = 'modal__status';
+}
+
+function closeTargetModal() {
+  document.getElementById('targetModal').style.display = 'none';
+}
+
+function renderTargetForm() {
+  const tbody = document.getElementById('targetTableBody');
+  tbody.innerHTML = '';
+
+  TARGET_STORES.forEach(s => {
+    // dashDataから既存の目標値をプリフィル
+    let t = null;
+    if (dashData && dashData.stores && dashData.stores[s.key] && dashData.stores[s.key].targets) {
+      t = dashData.stores[s.key].targets;
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="store-table__label">${s.label}</td>
+      <td><input type="number" data-store="${s.key}" data-field="monthlySales" value="${t ? t.monthlySales : 0}" placeholder="0"></td>
+      <td><input type="number" data-store="${s.key}" data-field="foodCostRatio" value="${t ? (t.foodCostRatio * 100).toFixed(0) : 28}" step="0.1" placeholder="28"></td>
+      <td><input type="number" data-store="${s.key}" data-field="laborCostRatio" value="${t ? (t.laborCostRatio * 100).toFixed(0) : 27}" step="0.1" placeholder="27"></td>
+      <td><input type="number" data-store="${s.key}" data-field="avgPrice" value="${t ? t.avgPrice : 0}" placeholder="0"></td>
+      <td><input type="number" data-store="${s.key}" data-field="guestCount" value="${t ? t.guestCount : 0}" placeholder="0"></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+async function saveTargets() {
+  const status = document.getElementById('targetSaveStatus');
+  const saveBtn = document.getElementById('targetSaveBtn');
+
+  // 月を取得
+  const monthInput = document.getElementById('targetMonthInput');
+  const monthVal = monthInput.value; // "2026-04"
+  if (!monthVal) {
+    status.textContent = '対象月を選択してください';
+    status.className = 'modal__status modal__status--error';
+    return;
+  }
+
+  // フォームからデータ収集
+  const targets = TARGET_STORES.map(s => {
+    const getVal = (field) => {
+      const input = document.querySelector(`input[data-store="${s.key}"][data-field="${field}"]`);
+      return input ? input.value : '0';
+    };
+    return {
+      store: s.key,
+      monthlySales: getVal('monthlySales'),
+      foodCostRatio: getVal('foodCostRatio'),
+      laborCostRatio: getVal('laborCostRatio'),
+      avgPrice: getVal('avgPrice'),
+      guestCount: getVal('guestCount')
+    };
+  });
+
+  // 保存
+  status.textContent = '保存中...';
+  status.className = 'modal__status modal__status--loading';
+  saveBtn.disabled = true;
+
+  try {
+    await saveTargetsData(monthVal, targets);
+    status.textContent = '保存しました！';
+    status.className = 'modal__status modal__status--ok';
+    // 2秒後にモーダルを閉じてダッシュボード更新
+    setTimeout(() => {
+      closeTargetModal();
+      loadDashboard();
+    }, 1500);
+  } catch (e) {
+    status.textContent = 'エラー: ' + e.message;
+    status.className = 'modal__status modal__status--error';
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
+
+function initTargetModal() {
+  document.getElementById('targetBtn').addEventListener('click', openTargetModal);
+  document.getElementById('targetModalClose').addEventListener('click', closeTargetModal);
+  document.getElementById('targetCancelBtn').addEventListener('click', closeTargetModal);
+  document.getElementById('targetSaveBtn').addEventListener('click', saveTargets);
+  // オーバーレイクリックで閉じる
+  document.querySelector('.modal__overlay').addEventListener('click', closeTargetModal);
+  // 月変更時にフォームをリセット（目標値は月ごとに異なるため）
+  document.getElementById('targetMonthInput').addEventListener('change', renderTargetForm);
+}
+
 // ===== 初期化 =====
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -708,6 +823,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 店舗フィルタ初期化
   initStoreFilter();
+
+  // 目標設定モーダル初期化
+  initTargetModal();
 
   // ログインフォーム
   document.getElementById('loginForm').addEventListener('submit', handleLogin);
