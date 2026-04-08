@@ -1,6 +1,19 @@
 // ダッシュボード描画ロジック v2
 // 3タブ構成: 今日の数字 / SNS・集客 / 月次P&L
 
+// ===== 店舗名マッピング（APIキー → 表示名） =====
+const STORE_DISPLAY = {
+  'せんべろ本店': 'せんべろ風土',
+  'SAN DRIP GARAGE': 'SAN DRIP GARAGE',
+  'GARAGE': 'GARAGE',
+  'Leje': 'Leje',
+  'ちゃっきー': 'ちゃっきー',
+  'スナックちゃっきー': 'ちゃっきー',
+  'せんべろ風土': 'せんべろ風土',
+  'Leje石垣島': 'Leje'
+};
+function displayName(key) { return STORE_DISPLAY[key] || key; }
+
 // ===== ユーティリティ =====
 
 function fmtYen(v) {
@@ -298,8 +311,20 @@ function renderChannelMatrix(sns) {
     });
   }
 
-  // TikTok行
-  if (sns.tiktok) {
+  // TikTok行（全店舗対応: tiktokAll[] があればそちらを使用）
+  if (sns.tiktokAll && sns.tiktokAll.length > 0) {
+    sns.tiktokAll.forEach(tt => {
+      const prev = (sns.tiktokAllPrev || []).find(p => p.store === tt.store);
+      const viewWow = prev ? wowBadge(tt.views, prev.views) : '';
+      const signal = tt.engRate >= 3 ? '🟢' : tt.engRate >= 1 ? '🟡' : '🔴';
+      const storeName = tt.store || 'TikTok';
+      rows.push({
+        store: storeName, channel: 'TikTok',
+        exposure: tt.views.toLocaleString(), interest: '-',
+        visits: '-', cvr: tt.engRate + '%', signal: signal, wow: viewWow
+      });
+    });
+  } else if (sns.tiktok) {
     const tt = sns.tiktok;
     const prev = sns.tiktokPrev || null;
     const viewWow = prev ? wowBadge(tt.views, prev.views) : '';
@@ -340,9 +365,9 @@ function renderChannelMatrix(sns) {
   // 広告・予約チャネル行
   if (sns.ads && sns.ads.length > 0) {
     sns.ads.forEach(ad => {
-      const signal = ad.cpa <= 0 ? '🟢' : ad.cpa <= 3000 ? '🟢' : ad.cpa <= 5000 ? '🟡' : '🔴';
+      const signal = ad.cpa <= 0 ? '🟢' : ad.cpa <= 2000 ? '🟢' : ad.cpa <= 5000 ? '🟡' : '🔴';
       rows.push({
-        store: ad.store, channel: ad.channel,
+        store: displayName(ad.store), channel: ad.channel,
         exposure: '-', interest: '-',
         visits: ad.estimatedVisits > 0 ? ad.estimatedVisits + '件' : '-',
         cvr: ad.cpa > 0 ? fmtYen(ad.cpa) + '/件' : '-',
@@ -481,8 +506,24 @@ function renderSNSTable(sns) {
     tbody.appendChild(tr);
   }
 
-  // TikTok行
-  if (sns.tiktok) {
+  // TikTok行（全店舗対応）
+  if (sns.tiktokAll && sns.tiktokAll.length > 0) {
+    sns.tiktokAll.forEach(tt => {
+      const prev = (sns.tiktokAllPrev || []).find(p => p.store === tt.store);
+      const viewWow = prev ? wowBadge(tt.views, prev.views) : '-';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="store-table__label">TikTok</td>
+        <td class="store-table__cell">${tt.store || '-'}</td>
+        <td class="store-table__cell">${tt.followers.toLocaleString()}</td>
+        <td class="store-table__cell">${tt.views.toLocaleString()}</td>
+        <td class="store-table__cell">-</td>
+        <td class="store-table__cell">${tt.engRate}%</td>
+        <td class="store-table__cell">${tt.videos}</td>
+        <td class="store-table__cell">${viewWow}</td>`;
+      tbody.appendChild(tr);
+    });
+  } else if (sns.tiktok) {
     const tt = sns.tiktok;
     const prev = sns.tiktokPrev || null;
     const viewWow = prev ? wowBadge(tt.views, prev.views) : '-';
@@ -529,10 +570,10 @@ function renderAdTable(sns) {
       // CPA色分け
       let cpaClass = '';
       if (ad.cpa > 5000) cpaClass = 'cell--danger';
-      else if (ad.cpa > 3000) cpaClass = 'cell--warning';
+      else if (ad.cpa > 2000) cpaClass = 'cell--warning';
       else if (ad.cpa > 0) cpaClass = 'cell--success';
       tr.innerHTML = `
-        <td class="store-table__label">${ad.store}</td>
+        <td class="store-table__label">${displayName(ad.store)}</td>
         <td class="store-table__cell">${ad.channel}</td>
         <td class="store-table__cell">${costStr}</td>
         <td class="store-table__cell">${visitStr}</td>
@@ -550,7 +591,7 @@ function renderAdTable(sns) {
     sns.reservations.forEach(r => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td class="store-table__label">${r.store}</td>
+        <td class="store-table__label">${displayName(r.store)}</td>
         <td class="store-table__cell">${r.platform}</td>
         <td class="store-table__cell">-</td>
         <td class="store-table__cell">${r.total}件</td>
@@ -767,7 +808,7 @@ async function handleLogin(e) {
 // ===== 目標設定モーダル =====
 
 const TARGET_STORES = [
-  { key: 'せんべろ本店', label: 'せんべろ本店' },
+  { key: 'せんべろ本店', label: 'せんべろ風土' },
   { key: 'SAN DRIP GARAGE', label: 'SAN DRIP GARAGE' },
   { key: 'Leje', label: 'Leje' },
   { key: 'ちゃっきー', label: 'ちゃっきー' }
