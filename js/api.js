@@ -30,7 +30,20 @@ async function fetchDashboardData(nocache = false) {
 
   let url = `${API_CONFIG.baseUrl}?action=getDashboard&token=${encodeURIComponent(token)}&_t=${Date.now()}`;
   if (nocache) url += '&nocache=1';
-  const res = await fetch(url);
+
+  // 30秒タイムアウト（GAS Web Appは応答が遅い場合がある）
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+  let res;
+  try {
+    res = await fetch(url, { signal: controller.signal });
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('データ取得がタイムアウトしました（30秒）。再試行してください。');
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
+  }
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
   const json = await res.json();

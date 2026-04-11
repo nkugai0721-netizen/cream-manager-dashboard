@@ -17,15 +17,15 @@ function displayName(key) { return STORE_DISPLAY[key] || key; }
 // ===== ユーティリティ =====
 
 function fmtYen(v) {
-  if (v == null) return '-';
+  if (v == null || isNaN(v)) return '-';
   return '¥' + Math.round(v).toLocaleString();
 }
 function fmtPct(v) {
-  if (v == null) return '-';
+  if (v == null || isNaN(v)) return '-';
   return (v * 100).toFixed(1) + '%';
 }
 function fmtNum(v) {
-  if (v == null) return '-';
+  if (v == null || isNaN(v)) return '-';
   return Math.round(v).toLocaleString();
 }
 
@@ -362,6 +362,21 @@ function renderChannelMatrix(sns) {
     });
   }
 
+  // GBP行（全店舗）
+  if (sns.gbp && sns.gbp.length > 0) {
+    sns.gbp.forEach(g => {
+      const visitEst = g.calls + g.routes;
+      const ratingStr = g.rating > 0 ? g.rating.toFixed(1) + '★' : '-';
+      const signal = g.rating >= 4.5 ? '🟢' : g.rating >= 4.0 ? '🟡' : '🔴';
+      rows.push({
+        store: displayName(g.store), channel: 'GBP',
+        exposure: g.users.toLocaleString(), interest: ratingStr + ' (' + g.reviews + '件)',
+        visits: visitEst > 0 ? visitEst + '件' : '-', cvr: '-',
+        signal: signal, wow: ''
+      });
+    });
+  }
+
   // 広告・予約チャネル行
   if (sns.ads && sns.ads.length > 0) {
     sns.ads.forEach(ad => {
@@ -539,6 +554,24 @@ function renderSNSTable(sns) {
       <td class="store-table__cell">${viewWow}</td>`;
     tbody.appendChild(tr);
   }
+
+  // GBP行（全店舗）
+  if (sns.gbp && sns.gbp.length > 0) {
+    sns.gbp.forEach(g => {
+      const ratingStr = g.rating > 0 ? g.rating.toFixed(1) + '★' : '-';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="store-table__label">GBP</td>
+        <td class="store-table__cell">${displayName(g.store)}</td>
+        <td class="store-table__cell">${g.users.toLocaleString()}</td>
+        <td class="store-table__cell">${g.interactions.toLocaleString()}</td>
+        <td class="store-table__cell">${ratingStr} (${g.reviews}件)</td>
+        <td class="store-table__cell">${g.calls}件</td>
+        <td class="store-table__cell">${g.routes}件</td>
+        <td class="store-table__cell">-</td>`;
+      tbody.appendChild(tr);
+    });
+  }
 }
 
 // 広告媒体・予約テーブル
@@ -674,9 +707,9 @@ function renderTable(data) {
         } else {
           let val = store[rowDef.field];
           if (rowDef.computed && store.sales > 0) {
-            if (rowDef.field === 'foodPct') val = store.food / store.sales;
-            else if (rowDef.field === 'drinkPct') val = store.drink / store.sales;
-            else if (rowDef.field === 'otherPct') val = store.other / store.sales;
+            if (rowDef.field === 'foodPct') val = (store.food || 0) / store.sales;
+            else if (rowDef.field === 'drinkPct') val = (store.drink || 0) / store.sales;
+            else if (rowDef.field === 'otherPct') val = (store.other || 0) / store.sales;
             else if (rowDef.field === 'foodCostPct') val = (store.foodCost || 0) / store.sales;
             else if (rowDef.field === 'drinkCostPct') val = (store.drinkCost || 0) / store.sales;
             else if (rowDef.field === 'supplyCostPct') val = (store.supplyCost || 0) / store.sales;
@@ -764,13 +797,17 @@ async function loadDashboard(nocache = false) {
 
     // 画面2: SNS・集客
     if (data.sns) {
-      renderChannelMatrix(data.sns);
-      renderSuggestions(data.sns);
-      renderSNSKpi(data.sns);
-      renderSNSReachChart(data.sns);
-      renderSNSEngChart(data.sns);
-      renderSNSTable(data.sns);
-      renderAdTable(data.sns);
+      try {
+        renderChannelMatrix(data.sns);
+        renderSuggestions(data.sns);
+        renderSNSKpi(data.sns);
+        renderSNSReachChart(data.sns);
+        renderSNSEngChart(data.sns);
+        renderSNSTable(data.sns);
+        renderAdTable(data.sns);
+      } catch (snsErr) {
+        console.error('SNS描画エラー:', snsErr);
+      }
     }
 
     // 画面3: 月次P&L
