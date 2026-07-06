@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/style.css?v=3">
 </head>
 <body>
 
@@ -51,6 +51,7 @@
         <button class="tab-nav__btn tab-nav__btn--active" data-tab="daily">今日の数字</button>
         <button class="tab-nav__btn" data-tab="sns">SNS・集客</button>
         <button class="tab-nav__btn" data-tab="monthly">月次P&L</button>
+        <button class="tab-nav__btn" data-tab="analysis">売上分析</button>
       </div>
     </nav>
 
@@ -302,6 +303,99 @@
 
         </div>
 
+        <!-- ==================== Tab 4: 売上分析 ==================== -->
+        <div id="tab-analysis" class="tab-panel" style="display:none;">
+
+          <!-- Store Filter (synced) -->
+          <div class="store-filter" id="storeFilterAnalysis">
+            <button class="store-filter__btn store-filter__btn--active" data-store="all">全店</button>
+            <button class="store-filter__btn" data-store="せんべろ本店">せんべろ</button>
+            <button class="store-filter__btn" data-store="SAN DRIP GARAGE">GARAGE</button>
+            <button class="store-filter__btn" data-store="Leje">Leje</button>
+          </div>
+
+          <!-- Target Achievement Summary -->
+          <div class="kpi-grid kpi-grid--4col">
+            <div class="kpi-card">
+              <div class="kpi-card__icon">🎯</div>
+              <div class="kpi-card__value" id="analysis-achieve-days">--</div>
+              <div class="kpi-card__sub" id="analysis-achieve-days-sub"></div>
+              <div class="kpi-card__label">目標達成日数</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-card__icon">📈</div>
+              <div class="kpi-card__value" id="analysis-remaining-target">--</div>
+              <div class="kpi-card__sub" id="analysis-remaining-target-sub"></div>
+              <div class="kpi-card__label">残り必要日売上</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-card__icon">🏆</div>
+              <div class="kpi-card__value" id="analysis-best-day">--</div>
+              <div class="kpi-card__sub" id="analysis-best-day-sub"></div>
+              <div class="kpi-card__label">最高売上日</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-card__icon">⚡</div>
+              <div class="kpi-card__value" id="analysis-avg-diff">--</div>
+              <div class="kpi-card__sub" id="analysis-avg-diff-sub"></div>
+              <div class="kpi-card__label">日平均 vs 目標</div>
+            </div>
+          </div>
+
+          <!-- Charts Row 1: 曜日別 + 客単価 -->
+          <div class="chart-grid">
+            <div class="chart-card">
+              <div class="chart-card__title">曜日別 平均売上</div>
+              <div class="chart-card__canvas chart-card__canvas--short">
+                <canvas id="dowChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card__title">客単価トレンド</div>
+              <div class="chart-card__canvas chart-card__canvas--short">
+                <canvas id="unitPriceChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart: 週別推移 -->
+          <div class="chart-card" style="margin-bottom:24px;">
+            <div class="chart-card__title">週別 日平均売上 × 客数推移</div>
+            <div class="chart-card__canvas">
+              <canvas id="weeklyTrendChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart: F/D比率（拡張データがある場合のみ表示） -->
+          <div class="chart-card" id="fdChartWrapper" style="margin-bottom:24px;display:none;">
+            <div class="chart-card__title">フード / ドリンク構成比推移</div>
+            <div class="chart-card__canvas chart-card__canvas--short">
+              <canvas id="fdTrendChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Daily Table -->
+          <div class="table-card">
+            <div class="table-card__title">日別実績</div>
+            <div class="table-card__wrapper">
+              <table class="store-table">
+                <thead>
+                  <tr>
+                    <th>日付</th>
+                    <th>曜日</th>
+                    <th>売上</th>
+                    <th>客数</th>
+                    <th>客単価</th>
+                    <th>目標差</th>
+                  </tr>
+                </thead>
+                <tbody id="analysisTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </main>
 
@@ -353,10 +447,11 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2/dist/chartjs-plugin-datalabels.min.js"></script>
-  <script src="js/auth.js?v=9"></script>
-  <script src="js/api.js?v=9"></script>
-  <script src="js/chart.js?v=9"></script>
-  <script src="js/dashboard.js?v=9"></script>
+  <script src="js/auth.js?v=10"></script>
+  <script src="js/api.js?v=10"></script>
+  <script src="js/chart.js?v=10"></script>
+  <script src="js/analysis.js?v=10"></script>
+  <script src="js/dashboard.js?v=10"></script>
 
 </body>
 </html>

@@ -861,8 +861,32 @@ body {
   cursor: not-allowed;
 }
 
+/* --- Analysis Tab --- */
+.kpi-grid--4col {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.analysis-kpi--negative {
+  color: var(--color-danger) !important;
+}
+
+.analysis-row--achieve td {
+  background: #F1F8E9 !important;
+}
+
+.analysis-dow--sun {
+  color: var(--color-danger) !important;
+  font-weight: 600 !important;
+}
+
+.analysis-dow--sat {
+  color: #1565C0 !important;
+  font-weight: 600 !important;
+}
+
 /* --- Responsive --- */
 @media (max-width: 1024px) {
+  .kpi-grid--4col { grid-template-columns: repeat(2, 1fr); }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .kpi-grid--3col { grid-template-columns: repeat(3, 1fr); }
   .chart-grid { grid-template-columns: 1fr; }
@@ -886,6 +910,7 @@ body {
   .kpi-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .kpi-grid--2col { grid-template-columns: 1fr; }
   .kpi-grid--3col { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .kpi-grid--4col { grid-template-columns: 1fr 1fr; gap: 12px; }
   .kpi-card { padding: 16px 12px; }
   .kpi-card__value { font-size: 1.2rem; }
   .kpi-card__icon { font-size: 1.4rem; }

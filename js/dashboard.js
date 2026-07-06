@@ -114,18 +114,22 @@ function initStoreFilter() {
     currentStore = localStorage.getItem('cream_store') || 'all';
   }
 
+  // 全タブの店舗フィルタボタンを一括初期化（daily + analysis）
   document.querySelectorAll('.store-filter__btn').forEach(btn => {
     // 初期状態の反映
-    if (btn.dataset.store === currentStore) {
-      document.querySelectorAll('.store-filter__btn').forEach(b => b.classList.remove('store-filter__btn--active'));
-      btn.classList.add('store-filter__btn--active');
-    }
+    btn.classList.toggle('store-filter__btn--active', btn.dataset.store === currentStore);
+
     btn.addEventListener('click', () => {
       currentStore = btn.dataset.store;
       localStorage.setItem('cream_store', currentStore);
-      document.querySelectorAll('.store-filter__btn').forEach(b => b.classList.remove('store-filter__btn--active'));
-      btn.classList.add('store-filter__btn--active');
-      if (dashData) renderDailyView(dashData);
+      // 全フィルタボタンの状態を同期
+      document.querySelectorAll('.store-filter__btn').forEach(b => {
+        b.classList.toggle('store-filter__btn--active', b.dataset.store === currentStore);
+      });
+      if (dashData) {
+        renderDailyView(dashData);
+        if (typeof renderAnalysisView === 'function') renderAnalysisView(dashData);
+      }
     });
   });
 }
@@ -816,6 +820,11 @@ async function loadDashboard(nocache = false) {
     renderSalesCompChart(data);
     renderCostCompChart(data);
     renderTable(data);
+
+    // 画面4: 売上分析
+    if (typeof renderAnalysisView === 'function') {
+      try { renderAnalysisView(data); } catch (e) { console.error('売上分析描画エラー:', e); }
+    }
 
     showLoading(false);
   } catch (e) {
