@@ -41,6 +41,7 @@ function renderAnalysisView(data) {
   const unitPriceTarget = (targets && targets.avgPrice > 0) ? targets.avgPrice : null;
 
   renderTargetSummary(daily, targets, forecast, dailyTarget, bizDays);
+  renderYoYComparisonInAnalysis(store);
   renderDowChart(daily, dailyTarget);
   renderWeeklyTrendChart(daily, dailyTarget);
   renderUnitPriceChart(daily, unitPriceTarget);
@@ -105,6 +106,85 @@ function renderTargetSummary(daily, targets, forecast, dailyTarget, bizDays) {
     el('analysis-avg-diff').textContent = fmtYen(dailyAvg);
     el('analysis-avg-diff').className = 'kpi-card__value';
     el('analysis-avg-diff-sub').textContent = '日平均売上';
+  }
+}
+
+// ===== 売上分析タブ内 前年同月比セクション =====
+function renderYoYComparisonInAnalysis(store) {
+  // YoYデータが未取得の場合はセクションを非表示
+  var wrapper = document.getElementById('analysisYoYSection');
+  if (!wrapper) return;
+
+  if (!yoyData || yoyData.length === 0) {
+    wrapper.style.display = 'none';
+    return;
+  }
+
+  var lastYear = getLastYearSameMonth(store);
+  if (!lastYear) {
+    wrapper.style.display = 'none';
+    return;
+  }
+
+  wrapper.style.display = '';
+
+  // 現在の月次データを取得
+  var thisData = null;
+  if (dashData) {
+    if (store === 'all') {
+      thisData = dashData.total;
+    } else {
+      thisData = dashData.stores[store];
+    }
+  }
+
+  if (!thisData) {
+    wrapper.style.display = 'none';
+    return;
+  }
+
+  var el = function(id) { return document.getElementById(id); };
+
+  // 売上対比
+  var thisSales = thisData.sales || 0;
+  var lastSales = lastYear.sales || 0;
+  if (lastSales > 0) {
+    var salesPct = ((thisSales - lastSales) / lastSales * 100);
+    el('analysis-yoy-sales').textContent = (salesPct >= 0 ? '+' : '') + salesPct.toFixed(1) + '%';
+    el('analysis-yoy-sales').className = 'kpi-card__value ' + (salesPct >= 0 ? '' : 'analysis-kpi--negative');
+    el('analysis-yoy-sales-sub').textContent = '昨年 ' + fmtYen(lastSales);
+  } else {
+    el('analysis-yoy-sales').textContent = '-';
+    el('analysis-yoy-sales').className = 'kpi-card__value';
+    el('analysis-yoy-sales-sub').textContent = '';
+  }
+
+  // 客数対比
+  var thisGuests = thisData.guests || 0;
+  var lastGuests = lastYear.guests || 0;
+  if (lastGuests > 0) {
+    var guestsPct = ((thisGuests - lastGuests) / lastGuests * 100);
+    el('analysis-yoy-guests').textContent = (guestsPct >= 0 ? '+' : '') + guestsPct.toFixed(1) + '%';
+    el('analysis-yoy-guests').className = 'kpi-card__value ' + (guestsPct >= 0 ? '' : 'analysis-kpi--negative');
+    el('analysis-yoy-guests-sub').textContent = '昨年 ' + lastGuests + '名';
+  } else {
+    el('analysis-yoy-guests').textContent = '-';
+    el('analysis-yoy-guests').className = 'kpi-card__value';
+    el('analysis-yoy-guests-sub').textContent = '';
+  }
+
+  // 客単価対比
+  var thisPrice = thisData.avgPrice || 0;
+  var lastPrice = lastYear.avgPrice || 0;
+  if (lastPrice > 0) {
+    var pricePct = ((thisPrice - lastPrice) / lastPrice * 100);
+    el('analysis-yoy-price').textContent = (pricePct >= 0 ? '+' : '') + pricePct.toFixed(1) + '%';
+    el('analysis-yoy-price').className = 'kpi-card__value ' + (pricePct >= 0 ? '' : 'analysis-kpi--negative');
+    el('analysis-yoy-price-sub').textContent = '昨年 ' + fmtYen(lastPrice);
+  } else {
+    el('analysis-yoy-price').textContent = '-';
+    el('analysis-yoy-price').className = 'kpi-card__value';
+    el('analysis-yoy-price-sub').textContent = '';
   }
 }
 

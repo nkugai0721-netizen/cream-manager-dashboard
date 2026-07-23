@@ -94,6 +94,11 @@ function initTabs() {
       document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
       document.getElementById('tab-' + tab).style.display = '';
       currentTab = tab;
+
+      // YoYタブの遅延読み込み
+      if (tab === 'yoy' && typeof loadYoYData === 'function') {
+        loadYoYData();
+      }
     });
   });
 }
@@ -129,6 +134,7 @@ function initStoreFilter() {
       if (dashData) {
         renderDailyView(dashData);
         if (typeof renderAnalysisView === 'function') renderAnalysisView(dashData);
+        if (typeof renderYoYView === 'function' && yoyLoaded) renderYoYView();
       }
     });
   });
@@ -638,6 +644,131 @@ function renderAdTable(sns) {
   }
 }
 
+// ===== P&L月別スナップショット管理 =====
+
+const PL_STORAGE_PREFIX = 'cream_pl_';
+let selectedPLMonth = null; // null = 当月（ライブ）
+
+// P&LデータをlocalStorageに保存
+function savePLSnapshot(data) {
+  if (!data || !data.targetMonth) return;
+  const month = data.targetMonth.substring(0, 7); // "YYYY-MM"
+  const snapshot = {
+    targetMonth: month,
+    updatedAt: data.updatedAt,
+    stores: data.stores,
+    total: data.total
+  };
+  try {
+    localStorage.setItem(PL_STORAGE_PREFIX + month, JSON.stringify(snapshot));
+  } catch (e) {
+    console.warn('P&Lスナップショット保存失敗:', e);
+  }
+}
+
+// 保存済みの月一覧を取得（降順ソート）
+function getSavedPLMonths() {
+  const months = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith(PL_STORAGE_PREFIX)) {
+      months.push(key.replace(PL_STORAGE_PREFIX, ''));
+    }
+  }
+  return months.sort().reverse();
+}
+
+// 指定月のスナップショットを読み込み
+function loadPLSnapshot(month) {
+  try {
+    const raw = localStorage.getItem(PL_STORAGE_PREFIX + month);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    console.warn('P&Lスナップショット読み込み失敗:', e);
+    return null;
+  }
+}
+
+// 月セレクター描画
+function renderMonthSelector(currentMonth) {
+  const list = document.getElementById('monthList');
+  list.innerHTML = '';
+
+  const savedMonths = getSavedPLMonths();
+  // 当月が保存済みリストになければ先頭に追加
+  const liveMonth = currentMonth ? currentMonth.substring(0, 7) : null;
+  const allMonths = [...new Set([liveMonth, ...savedMonths].filter(Boolean))].sort().reverse();
+
+  if (allMonths.length === 0) {
+    list.innerHTML = '<span class="month-selector__empty">データなし</span>';
+    return;
+  }
+
+  // activeな月が未設定なら当月（ライブ）
+  if (!selectedPLMonth) selectedPLMonth = liveMonth;
+
+  allMonths.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'month-selector__btn';
+    if (m === selectedPLMonth) btn.classList.add('month-selector__btn--active');
+    if (m === liveMonth) btn.classList.add('month-selector__btn--live');
+
+    const [y, mo] = m.split('-');
+    btn.textContent = `${y}年${parseInt(mo)}月`;
+    btn.dataset.month = m;
+
+    btn.addEventListener('click', () => {
+      if (m === selectedPLMonth) return;
+      selectedPLMonth = m;
+      // ボタン状態更新
+      list.querySelectorAll('.month-selector__btn').forEach(b => b.classList.remove('month-selector__btn--active'));
+      btn.classList.add('month-selector__btn--active');
+      // データ切り替えて再描画
+      renderPLForMonth(m, liveMonth);
+    });
+
+    list.appendChild(btn);
+  });
+
+  // 矢印ボタンでスクロール
+  document.getElementById('monthPrev').onclick = () => { list.scrollBy({ left: -120, behavior: 'smooth' }); };
+  document.getElementById('monthNext').onclick = () => { list.scrollBy({ left: 120, behavior: 'smooth' }); };
+
+  // 選択中の月が見えるようにスクロール
+  setTimeout(() => {
+    const activeBtn = list.querySelector('.month-selector__btn--active');
+    if (activeBtn) activeBtn.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  }, 100);
+}
+
+// 指定月のP&Lを描画
+function renderPLForMonth(month, liveMonth) {
+  let plData;
+  if (month === liveMonth && dashData) {
+    // 当月はライブデータ
+    plData = dashData;
+  } else {
+    // 過去月はスナップショット
+    plData = loadPLSnapshot(month);
+  }
+
+  if (!plData) {
+    // データがない場合の表示
+    document.getElementById('storeTableBody').innerHTML =
+      `<tr><td colspan="6" style="text-align:center;padding:40px;color:#999;">
+        ${month} のデータはありません
+      </td></tr>`;
+    return;
+  }
+
+  // チャート＋テーブル再描画
+  renderStoreChart(plData);
+  renderFLChart(plData);
+  renderSalesCompChart(plData);
+  renderCostCompChart(plData);
+  renderTable(plData);
+}
+
 // ===== 画面3: 月次P&L テーブル =====
 
 function renderTable(data) {
@@ -814,7 +945,10 @@ async function loadDashboard(nocache = false) {
       }
     }
 
-    // 画面3: 月次P&L
+    // 画面3: 月次P&L（スナップショット保存 + 月セレクター）
+    savePLSnapshot(data);
+    selectedPLMonth = data.targetMonth ? data.targetMonth.substring(0, 7) : null;
+    renderMonthSelector(data.targetMonth);
     renderStoreChart(data);
     renderFLChart(data);
     renderSalesCompChart(data);
@@ -827,6 +961,18 @@ async function loadDashboard(nocache = false) {
     }
 
     showLoading(false);
+
+    // YoYデータをバックグラウンドで取得（売上分析タブの前年同月比にも使用）
+    if (typeof loadYoYData === 'function' && !yoyLoaded) {
+      loadYoYData().then(function() {
+        // YoYデータ取得後、売上分析タブを再描画（前年同月比を表示）
+        if (typeof renderAnalysisView === 'function' && dashData) {
+          try { renderAnalysisView(dashData); } catch (e) {}
+        }
+      }).catch(function(e) {
+        console.error('YoYバックグラウンド取得エラー:', e);
+      });
+    }
   } catch (e) {
     showLoading(false);
     showError(e.message);

@@ -861,6 +861,109 @@ body {
   cursor: not-allowed;
 }
 
+/* --- Month Selector (P&L tab) --- */
+.month-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.month-selector__arrow {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-bg-card);
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--color-text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.month-selector__arrow:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.month-selector__arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.month-selector__list {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 2px 0;
+}
+
+.month-selector__list::-webkit-scrollbar {
+  display: none;
+}
+
+.month-selector__btn {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 50px;
+  background: var(--color-bg-card);
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: var(--font-ja);
+  color: var(--color-text-light);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  position: relative;
+}
+
+.month-selector__btn:hover {
+  border-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.month-selector__btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.month-selector__btn--live::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-success);
+  margin-left: 6px;
+  vertical-align: middle;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+.month-selector__btn--active.month-selector__btn--live::after {
+  background: #90EE90;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.month-selector__empty {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  padding: 6px 12px;
+}
+
 /* --- Analysis Tab --- */
 .kpi-grid--4col {
   grid-template-columns: repeat(4, 1fr);
@@ -882,6 +985,43 @@ body {
 .analysis-dow--sat {
   color: #1565C0 !important;
   font-weight: 600 !important;
+}
+
+/* --- YoY (昨年対比) Tab --- */
+.yoy-no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 12px;
+  padding: 48px 24px;
+}
+
+.yoy-no-data__icon {
+  font-size: 3rem;
+  opacity: 0.4;
+}
+
+.yoy-no-data__text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+}
+
+.yoy-no-data__sub {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  max-width: 400px;
+}
+
+.yoy-sub-rate {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  font-weight: 400;
+  margin-top: 2px;
 }
 
 /* --- Responsive --- */

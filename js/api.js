@@ -23,6 +23,37 @@ async function saveTargetsData(month, targets) {
   return json;
 }
 
+// 昨年対比データ取得
+async function fetchYoYData() {
+  const token = getToken();
+  if (!token) throw new Error('認証トークンがありません');
+
+  const url = `${API_CONFIG.baseUrl}?action=getYoYData&token=${encodeURIComponent(token)}&_t=${Date.now()}`;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+  let res;
+  try {
+    res = await fetch(url, { signal: controller.signal });
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('YoYデータ取得がタイムアウトしました');
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+  const json = await res.json();
+  if (json.status === 'unauthorized') {
+    logout();
+    throw new Error('認証エラー');
+  }
+  if (json.status === 'error') throw new Error(json.message || 'APIエラー');
+
+  return json.data;
+}
+
 // ダッシュボードデータ取得（nocache=trueでGASキャッシュ強制クリア）
 async function fetchDashboardData(nocache = false) {
   const token = getToken();

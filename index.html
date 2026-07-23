@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
 
@@ -52,6 +52,7 @@
         <button class="tab-nav__btn" data-tab="sns">SNS・集客</button>
         <button class="tab-nav__btn" data-tab="monthly">月次P&L</button>
         <button class="tab-nav__btn" data-tab="analysis">売上分析</button>
+        <button class="tab-nav__btn" data-tab="yoy">昨年対比</button>
       </div>
     </nav>
 
@@ -249,6 +250,13 @@
         <!-- ==================== Tab 3: 月次P&L ==================== -->
         <div id="tab-monthly" class="tab-panel" style="display:none;">
 
+          <!-- Month Selector -->
+          <div class="month-selector" id="monthSelector">
+            <button class="month-selector__arrow" id="monthPrev" title="前月">&lsaquo;</button>
+            <div class="month-selector__list" id="monthList"></div>
+            <button class="month-selector__arrow" id="monthNext" title="次月">&rsaquo;</button>
+          </div>
+
           <!-- Charts Row 1 -->
           <div class="chart-grid">
             <div class="chart-card">
@@ -342,6 +350,33 @@
             </div>
           </div>
 
+          <!-- YoY Comparison (前年同月比) -->
+          <div id="analysisYoYSection" style="display:none;">
+            <div class="section-divider">
+              <span class="section-divider__label">前年同月比</span>
+            </div>
+            <div class="kpi-grid kpi-grid--3col" style="margin-bottom:24px;">
+              <div class="kpi-card">
+                <div class="kpi-card__icon">📊</div>
+                <div class="kpi-card__value" id="analysis-yoy-sales">--</div>
+                <div class="kpi-card__sub" id="analysis-yoy-sales-sub"></div>
+                <div class="kpi-card__label">売上 前年比</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-card__icon">👥</div>
+                <div class="kpi-card__value" id="analysis-yoy-guests">--</div>
+                <div class="kpi-card__sub" id="analysis-yoy-guests-sub"></div>
+                <div class="kpi-card__label">客数 前年比</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-card__icon">💰</div>
+                <div class="kpi-card__value" id="analysis-yoy-price">--</div>
+                <div class="kpi-card__sub" id="analysis-yoy-price-sub"></div>
+                <div class="kpi-card__label">客単価 前年比</div>
+              </div>
+            </div>
+          </div>
+
           <!-- Charts Row 1: 曜日別 + 客単価 -->
           <div class="chart-grid">
             <div class="chart-card">
@@ -392,6 +427,116 @@
                 <tbody id="analysisTableBody"></tbody>
               </table>
             </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== Tab 5: 昨年対比 ==================== -->
+        <div id="tab-yoy" class="tab-panel" style="display:none;">
+
+          <!-- Store Filter -->
+          <div class="store-filter" id="storeFilterYoY">
+            <button class="store-filter__btn store-filter__btn--active" data-store="all">全店</button>
+            <button class="store-filter__btn" data-store="せんべろ本店">せんべろ</button>
+            <button class="store-filter__btn" data-store="SAN DRIP GARAGE">GARAGE</button>
+            <button class="store-filter__btn" data-store="Leje">Leje</button>
+            <button class="store-filter__btn" data-store="ちゃっきー">ちゃっきー</button>
+          </div>
+
+          <!-- YoY Loading -->
+          <div id="yoyLoading" class="loading" style="display:none;">
+            <div class="loading__spinner"></div>
+            <div class="loading__text">昨年対比データを取得中...</div>
+          </div>
+
+          <!-- YoY Content -->
+          <div id="yoyContent" style="display:none;">
+
+            <!-- YoY KPI Summary -->
+            <div class="kpi-grid kpi-grid--4col">
+              <div class="kpi-card">
+                <div class="kpi-card__icon">📊</div>
+                <div class="kpi-card__value" id="yoy-sales-diff">--</div>
+                <div class="kpi-card__sub" id="yoy-sales-diff-sub"></div>
+                <div class="kpi-card__label">売上 前年同月比</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-card__icon">👥</div>
+                <div class="kpi-card__value" id="yoy-guests-diff">--</div>
+                <div class="kpi-card__sub" id="yoy-guests-diff-sub"></div>
+                <div class="kpi-card__label">客数 前年同月比</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-card__icon">💰</div>
+                <div class="kpi-card__value" id="yoy-price-diff">--</div>
+                <div class="kpi-card__sub" id="yoy-price-diff-sub"></div>
+                <div class="kpi-card__label">客単価 前年同月比</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-card__icon">📈</div>
+                <div class="kpi-card__value" id="yoy-profit-diff">--</div>
+                <div class="kpi-card__sub" id="yoy-profit-diff-sub"></div>
+                <div class="kpi-card__label">営業利益 前年同月比</div>
+              </div>
+            </div>
+
+            <!-- YoY Sales Trend Chart -->
+            <div class="chart-card" style="margin-bottom:24px;">
+              <div class="chart-card__title">月別売上推移（今年 vs 昨年）</div>
+              <div class="chart-card__canvas">
+                <canvas id="yoySalesChart"></canvas>
+              </div>
+            </div>
+
+            <!-- YoY Cost Ratio Chart -->
+            <div class="chart-grid">
+              <div class="chart-card">
+                <div class="chart-card__title">食材費率 推移（今年 vs 昨年）</div>
+                <div class="chart-card__canvas chart-card__canvas--short">
+                  <canvas id="yoyFoodCostChart"></canvas>
+                </div>
+              </div>
+              <div class="chart-card">
+                <div class="chart-card__title">FL比率 推移（今年 vs 昨年）</div>
+                <div class="chart-card__canvas chart-card__canvas--short">
+                  <canvas id="yoyFLChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- YoY Monthly Comparison Table -->
+            <div class="table-card">
+              <div class="table-card__title">月別 昨年対比一覧</div>
+              <div class="table-card__wrapper">
+                <table class="store-table">
+                  <thead>
+                    <tr>
+                      <th>月</th>
+                      <th>今年売上</th>
+                      <th>昨年売上</th>
+                      <th>差額</th>
+                      <th>増減率</th>
+                      <th>今年客数</th>
+                      <th>昨年客数</th>
+                      <th>今年客単価</th>
+                      <th>昨年客単価</th>
+                      <th>食材費率</th>
+                      <th>人件費率</th>
+                      <th>FL比率</th>
+                    </tr>
+                  </thead>
+                  <tbody id="yoyTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- No Data Message -->
+          <div id="yoyNoData" class="yoy-no-data" style="display:none;">
+            <div class="yoy-no-data__icon">📋</div>
+            <div class="yoy-no-data__text">昨年対比データがありません</div>
+            <div class="yoy-no-data__sub">Dashboard SSの「月次実績蓄積」シートにデータを入力してください</div>
           </div>
 
         </div>
@@ -447,11 +592,12 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2/dist/chartjs-plugin-datalabels.min.js"></script>
-  <script src="js/auth.js?v=10"></script>
-  <script src="js/api.js?v=10"></script>
-  <script src="js/chart.js?v=10"></script>
-  <script src="js/analysis.js?v=10"></script>
-  <script src="js/dashboard.js?v=10"></script>
+  <script src="js/auth.js?v=12"></script>
+  <script src="js/api.js?v=12"></script>
+  <script src="js/chart.js?v=12"></script>
+  <script src="js/analysis.js?v=12"></script>
+  <script src="js/yoy.js?v=12"></script>
+  <script src="js/dashboard.js?v=12"></script>
 
 </body>
 </html>
