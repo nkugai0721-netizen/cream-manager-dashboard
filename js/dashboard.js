@@ -644,49 +644,47 @@ function renderAdTable(sns) {
   }
 }
 
-// ===== P&L月別スナップショット管理 =====
+// ===== P&L月別データ管理（JSON履歴 + ライブ） =====
 
-const PL_STORAGE_PREFIX = 'cream_pl_';
 let selectedPLMonth = null; // null = 当月（ライブ）
+let plHistoryData = null;   // monthly_pl_history.json の中身
 
-// P&LデータをlocalStorageに保存
-function savePLSnapshot(data) {
-  if (!data || !data.targetMonth) return;
-  const month = data.targetMonth.substring(0, 7); // "YYYY-MM"
-  const snapshot = {
-    targetMonth: month,
-    updatedAt: data.updatedAt,
-    stores: data.stores,
-    total: data.total
-  };
+// 過去月PLデータ（JSON）を読み込み
+async function loadPLHistory() {
   try {
-    localStorage.setItem(PL_STORAGE_PREFIX + month, JSON.stringify(snapshot));
-  } catch (e) {
-    console.warn('P&Lスナップショット保存失敗:', e);
-  }
-}
-
-// 保存済みの月一覧を取得（降順ソート）
-function getSavedPLMonths() {
-  const months = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith(PL_STORAGE_PREFIX)) {
-      months.push(key.replace(PL_STORAGE_PREFIX, ''));
+    const res = await fetch('data/monthly_pl_history.json?_t=' + Date.now());
+    if (!res.ok) {
+      console.warn('PL履歴JSON取得失敗:', res.status);
+      return;
     }
+    plHistoryData = await res.json();
+    console.log('PL履歴ロード完了:', Object.keys(plHistoryData).length, '件');
+  } catch (e) {
+    console.warn('PL履歴JSON読み込みエラー:', e);
   }
-  return months.sort().reverse();
 }
 
-// 指定月のスナップショットを読み込み
-function loadPLSnapshot(month) {
-  try {
-    const raw = localStorage.getItem(PL_STORAGE_PREFIX + month);
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) {
-    console.warn('P&Lスナップショット読み込み失敗:', e);
-    return null;
+// 全月一覧を取得（JSON履歴 + 当月ライブ、降順）
+function getAllPLMonths(liveMonth) {
+  const months = new Set();
+  if (liveMonth) months.add(liveMonth);
+  if (plHistoryData) {
+    Object.keys(plHistoryData).forEach(m => months.add(m));
   }
+  return [...months].sort().reverse();
+}
+
+// 指定月のデータを取得
+function getPLDataForMonth(month, liveMonth) {
+  // 当月はライブデータ
+  if (month === liveMonth && dashData) {
+    return dashData;
+  }
+  // 過去月はJSON履歴
+  if (plHistoryData && plHistoryData[month]) {
+    return plHistoryData[month];
+  }
+  return null;
 }
 
 // 月セレクター描画
@@ -694,10 +692,8 @@ function renderMonthSelector(currentMonth) {
   const list = document.getElementById('monthList');
   list.innerHTML = '';
 
-  const savedMonths = getSavedPLMonths();
-  // 当月が保存済みリストになければ先頭に追加
   const liveMonth = currentMonth ? currentMonth.substring(0, 7) : null;
-  const allMonths = [...new Set([liveMonth, ...savedMonths].filter(Boolean))].sort().reverse();
+  const allMonths = getAllPLMonths(liveMonth);
 
   if (allMonths.length === 0) {
     list.innerHTML = '<span class="month-selector__empty">データなし</span>';
@@ -743,17 +739,9 @@ function renderMonthSelector(currentMonth) {
 
 // 指定月のP&Lを描画
 function renderPLForMonth(month, liveMonth) {
-  let plData;
-  if (month === liveMonth && dashData) {
-    // 当月はライブデータ
-    plData = dashData;
-  } else {
-    // 過去月はスナップショット
-    plData = loadPLSnapshot(month);
-  }
+  const plData = getPLDataForMonth(month, liveMonth);
 
   if (!plData) {
-    // データがない場合の表示
     document.getElementById('storeTableBody').innerHTML =
       `<tr><td colspan="6" style="text-align:center;padding:40px;color:#999;">
         ${month} のデータはありません
@@ -945,8 +933,8 @@ async function loadDashboard(nocache = false) {
       }
     }
 
-    // 画面3: 月次P&L（スナップショット保存 + 月セレクター）
-    savePLSnapshot(data);
+    // 画面3: 月次P&L（JSON履歴 + 月セレクター）
+    if (!plHistoryData) await loadPLHistory();
     selectedPLMonth = data.targetMonth ? data.targetMonth.substring(0, 7) : null;
     renderMonthSelector(data.targetMonth);
     renderStoreChart(data);
