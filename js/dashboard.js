@@ -674,15 +674,15 @@ function getAllPLMonths(liveMonth) {
   return [...months].sort().reverse();
 }
 
-// 指定月のデータを取得
+// 指定月のデータを取得（JSON確定値を優先）
 function getPLDataForMonth(month, liveMonth) {
-  // 当月はライブデータ
-  if (month === liveMonth && dashData) {
-    return dashData;
-  }
-  // 過去月はJSON履歴
+  // JSON履歴（Dropbox Excel確定値）を優先
   if (plHistoryData && plHistoryData[month]) {
     return plHistoryData[month];
+  }
+  // フォールバック: ライブAPIデータ
+  if (month === liveMonth && dashData) {
+    return dashData;
   }
   return null;
 }
@@ -933,15 +933,16 @@ async function loadDashboard(nocache = false) {
       }
     }
 
-    // 画面3: 月次P&L（JSON履歴 + 月セレクター）
+    // 画面3: 月次P&L（JSON確定値を優先、フォールバックでAPIデータ）
     if (!plHistoryData) await loadPLHistory();
     selectedPLMonth = data.targetMonth ? data.targetMonth.substring(0, 7) : null;
     renderMonthSelector(data.targetMonth);
-    renderStoreChart(data);
-    renderFLChart(data);
-    renderSalesCompChart(data);
-    renderCostCompChart(data);
-    renderTable(data);
+    const plInitData = getPLDataForMonth(selectedPLMonth, selectedPLMonth) || data;
+    renderStoreChart(plInitData);
+    renderFLChart(plInitData);
+    renderSalesCompChart(plInitData);
+    renderCostCompChart(plInitData);
+    renderTable(plInitData);
 
     // 画面4: 売上分析
     if (typeof renderAnalysisView === 'function') {
