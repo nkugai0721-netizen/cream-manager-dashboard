@@ -257,9 +257,19 @@ def process_store(store_name):
             month_key = f"{year}-{month:02d}"
             filepath = os.path.join(year_path, filename)
 
-            # 収支報告ファイルを優先（既にPLデータがあれば経営管理はスキップ）
-            if month_key in results and results[month_key].get("_source") == "pl" and file_type == "management":
-                continue
+            # 2026-04以降は経営管理を優先、それ以前は収支報告を優先
+            MGMT_PRIORITY_FROM = "2026-04"
+            use_mgmt_priority = month_key >= MGMT_PRIORITY_FROM
+            if month_key in results:
+                existing_source = results[month_key].get("_source")
+                if use_mgmt_priority:
+                    # 経営管理優先: 既に経営管理データがあればPLはスキップ
+                    if existing_source == "management" and file_type == "pl":
+                        continue
+                else:
+                    # 収支報告優先: 既にPLデータがあれば経営管理はスキップ
+                    if existing_source == "pl" and file_type == "management":
+                        continue
 
             try:
                 wb = openpyxl.load_workbook(filepath, data_only=True)
@@ -296,8 +306,12 @@ def process_store(store_name):
 
                 compute_ratios(data)
 
-                # 収支報告を優先、経営管理はフォールバック
-                if month_key not in results or file_type == "pl":
+                # 優先ソースで上書き
+                if month_key not in results:
+                    results[month_key] = data
+                elif use_mgmt_priority and file_type == "management":
+                    results[month_key] = data
+                elif not use_mgmt_priority and file_type == "pl":
                     results[month_key] = data
 
                 print(f"  {month_key} ({file_type}): 売上 ¥{data['sales']:,.0f}")
